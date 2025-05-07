@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VALORANT 定点管理アプリ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <!-- マップ選択エリア -->
+            <div class="map-selection">
+                <div class="map-buttons">
+                    <button class="map-btn" data-map="Ascent">Ascent</button>
+                    <button class="map-btn" data-map="Bind">Bind</button>
+                    <button class="map-btn" data-map="Haven">Haven</button>
+                    <button class="map-btn" data-map="Split">Split</button>
+                    <button class="map-btn" data-map="Icebox">Icebox</button>
+                    <button class="map-btn" data-map="Breeze">Breeze</button>
+                    <button class="map-btn" data-map="Pearl">Pearl</button>
+                    <button class="map-btn" data-map="Lotus">Lotus</button>
+                </div>
+                <div class="side-selection">
+                    <button class="side-btn active" data-side="attack">攻め</button>
+                    <button class="side-btn" data-side="defense">守り</button>
+                </div>
+                <!-- スキルアイコン表示エリア -->
+                <div class="skill-buttons">
+                    <!-- スキルボタンはJavaScriptで動的に生成 -->
+                </div>
+                <!-- カテゴリ表示エリア -->
+                <div class="category-buttons">
+                    <!-- カテゴリボタンはJavaScriptで動的に生成 -->
+                </div>
+            </div>
+
+            <!-- マップ表示エリア -->
+            <div class="map-display">
+                <div class="map-container">
+                    <img id="mapImage" src="" alt="マップ">
+                    <div id="positionMarker" class="position-marker" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- エージェント選択エリア -->
+        <div class="agent-selection">
+            <div class="agent-buttons">
+                <!-- エージェントボタンはJavaScriptで動的に生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 定点詳細モーダル -->
+    <div id="pointModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="slider-container">
+                <img class="slider-image" src="" alt="定点画像">
+            </div>
+            <div class="slider-controls">
+                <button class="slider-btn" id="prevBtn">前へ</button>
+                <span class="slider-counter">1/1</span>
+                <button class="slider-btn" id="nextBtn">次へ</button>
+            </div>
+            <div class="point-info">
+                <h3>定点情報</h3>
+                <p id="pointDescription"></p>
+                <p id="throwType"></p>
+                <button id="favoriteBtn" class="favorite-btn">
+                    <span class="favorite-icon">★</span>
+                    <span class="favorite-text">お気に入りに追加</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- お気に入り一覧モーダル -->
+    <div id="favoritesModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>お気に入り一覧</h2>
+            <div id="favoritesList" class="favorites-list">
+                <!-- お気に入り一覧はJavaScriptで動的に生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 新規定点追加モーダル -->
+    <div id="addPointModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>新規定点の追加</h2>
+            
+            <!-- ステップ1: マップ選択 -->
+            <div id="step1" class="add-point-step">
+                <h3>マップを選択</h3>
+                <div class="map-buttons">
+                    <button class="map-btn" data-map="Ascent">Ascent</button>
+                    <button class="map-btn" data-map="Bind">Bind</button>
+                    <button class="map-btn" data-map="Haven">Haven</button>
+                    <button class="map-btn" data-map="Split">Split</button>
+                    <button class="map-btn" data-map="Icebox">Icebox</button>
+                    <button class="map-btn" data-map="Breeze">Breeze</button>
+                    <button class="map-btn" data-map="Pearl">Pearl</button>
+                    <button class="map-btn" data-map="Lotus">Lotus</button>
+                </div>
+                <div class="step-navigation">
+                    <button class="next-step-btn" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- ステップ2: エージェント選択 -->
+            <div id="step2" class="add-point-step" style="display: none;">
+                <h3>エージェントを選択</h3>
+                <div class="agent-selection-grid">
+                    <!-- エージェントボタンはJavaScriptで動的に生成 -->
+                </div>
+                <div class="step-navigation">
+                    <button class="prev-step-btn">戻る</button>
+                    <button class="next-step-btn" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- ステップ3: スキル選択 -->
+            <div id="step3" class="add-point-step" style="display: none;">
+                <h3>スキルを選択</h3>
+                <div class="skill-selection">
+                    <select id="pointSkill" name="skill" required>
+                        <!-- スキル選択肢はJavaScriptで動的に生成 -->
+                    </select>
+                </div>
+                <div class="step-navigation">
+                    <button class="prev-step-btn">戻る</button>
+                    <button class="next-step-btn" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- ステップ4: サイド選択 -->
+            <div id="step4" class="add-point-step" style="display: none;">
+                <h3>サイドを選択</h3>
+                <div class="side-selection">
+                    <button class="side-btn" data-side="attack">攻め</button>
+                    <button class="side-btn" data-side="defense">守り</button>
+                </div>
+                <div class="step-navigation">
+                    <button class="prev-step-btn">戻る</button>
+                    <button class="next-step-btn" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- ステップ5: 定点情報入力 -->
+            <div id="step5" class="add-point-step" style="display: none;">
+                <h3>定点情報を入力</h3>
+                <form id="addPointForm" class="add-point-form">
+                    <div class="form-group">
+                        <label for="pointCategory">カテゴリ</label>
+                        <select id="pointCategory" name="category" required>
+                            <!-- カテゴリ選択肢はJavaScriptで動的に生成 -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pointDescription">説明</label>
+                        <textarea id="pointDescription" name="description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="pointThrowType">投げ方</label>
+                        <select id="pointThrowType" name="throwType" required>
+                            <option value="その場投げ">その場投げ</option>
+                            <option value="ジャンプ投げ">ジャンプ投げ</option>
+                            <option value="走りジャンプ投げ">走りジャンプ投げ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>位置</label>
+                        <div class="position-info">
+                            <p>X: <span id="positionX">0</span>%</p>
+                            <p>Y: <span id="positionY">0</span>%</p>
+                        </div>
+                        <div class="position-controls">
+                            <button type="button" class="position-btn" data-direction="up">↑</button>
+                            <button type="button" class="position-btn" data-direction="down">↓</button>
+                            <button type="button" class="position-btn" data-direction="left">←</button>
+                            <button type="button" class="position-btn" data-direction="right">→</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>画像（最大5枚）</label>
+                        <div class="image-upload">
+                            <input type="file" id="pointImages" name="images" accept="image/*" multiple required>
+                            <div id="imagePreview" class="image-preview"></div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">追加</button>
+                        <button type="button" class="cancel-btn">キャンセル</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- フローティングボタン -->
+    <div class="floating-buttons">
+        <button id="showFavoritesBtn" class="floating-btn">
+            <span class="favorite-icon">★</span>
+            <span class="favorite-text">お気に入り</span>
+        </button>
+        <button id="addPointBtn" class="floating-btn">
+            <span class="add-icon">+</span>
+            <span class="add-text">新規追加</span>
+        </button>
+    </div>
+
+    <script src="firebase.js" type="module"></script>
+    <script src="script.js" type="module"></script>
+</body>
+</html> 

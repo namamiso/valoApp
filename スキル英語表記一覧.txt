@@ -1,0 +1,63 @@
+<!-- フェイド -->
+haunt
+seize
+<!-- ブリーチ -->
+after shock
+flash point
+<!-- ブリム -->
+incendiary
+<!-- サイファー -->
+trap Wire
+cyber Cage
+spy Cam
+<!-- デッドロック -->
+barrier mesh
+gravnet
+sonic sensor
+annihilation
+<!-- フェニ -->
+curve Ball
+hotHands
+<!-- セージ -->
+slow orb
+barrier orb
+<!-- ソーヴァ -->
+shock bolt
+recon bolt
+<!-- ヴァイパー -->
+poison cloud
+toxic screen
+snake bite
+viper's pit
+<!-- ジョイ -->
+nanoswarm
+<!-- レイズ -->
+paint shells
+<!-- スカイ -->
+guiding light
+<!-- ヨル -->
+blind side
+gate crash
+<!-- ケイオー -->
+flash/drive
+zero/point
+flag/ment
+<!-- ネオン -->
+relay bolt
+<!-- ハーバー -->
+cove
+<!-- ゲッコー -->
+dizzy
+mosh pit
+<!-- クローブ -->
+meddle
+<!-- ヴァイス -->
+shear
+arc rose
+razorvine
+<!-- テホ -->
+special delivery
+<!-- ウェイレイ -->
+saturate
+
+
