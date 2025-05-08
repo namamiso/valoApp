@@ -19,20 +19,26 @@ const db = getFirestore(app);
 
 // カテゴリマッピング
 const categoryMapping = {
+  'killjoy': {
+    'Nanoswarm': {
+      'attack': ['エントリー', 'リテイク阻止', '解除阻止', 'ガジェット破壊', 'ウルトセット'],
+      'defense': ['開幕', 'ガジェット破壊', 'ウルトセット']
+    }
+  },
   'sova': {
     'Recon Bolt': {
-      'attack': ['メイン＆ミッド取り', 'エントリー', 'ガジェット破壊'],
+      'attack': ['メイン＆ミッド取り', 'エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター', 'リテイク']
     },
     'Shock Bolt': {
-      'attack': ['エントリー', 'リテイク阻止', '解除阻止'],
-      'defense': ['カウンター', 'リテイク']
+      'attack': ['解除阻止', 'ガジェット破壊'],
+      'defense': ['開幕', '設置阻止', 'ガジェット破壊']
     }
   },
   'phoenix': {
     'Curveball': {
       'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'defense': ['カウンター']
     },
     'Hot Hands': {
       'attack': ['エントリー', 'リテイク阻止'],
@@ -41,8 +47,8 @@ const categoryMapping = {
   },
   'sage': {
     'Barrier Orb': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'attack': ['設置位置'],
+      'defense': ['きも壁']
     },
     'Slow Orb': {
       'attack': ['エントリー', 'リテイク阻止'],
@@ -51,32 +57,40 @@ const categoryMapping = {
   },
   'cypher': {
     'Spy Cam': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'attack': ['null'],
+      'defense': ['null']
     },
     'Cyber Cage': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'attack': ['null'],
+      'defense': ['null']
+    },
+    'Trapwire': {
+      'attack': ['null'],
+      'defense': ['null']
     }
   },
   'brimstone': {
-    'Smoke Screen': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
-    },
     'Incendiary': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'attack': ['エントリー', 'リテイク阻止', '解除阻止'],
+      'defense': ['カウンター', 'リテイク']
     }
   },
   'viper': {
     'Poison Cloud': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'attack': ['ノーマルモク', '解除ワンウェイ'],
+      'defense': ['ノーマルモク', 'ワンウェイ']
     },
     'Toxic Screen': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'attack': ['null'],
+      'defense': ['null']
+    },
+    'Snake_Bite': {
+      'attack': ['エントリー', 'リテイク阻止', '解除阻止'],
+      'defense': ['設置阻止', 'リテイク']
+    },
+    'Vipers Pit': {
+      'attack': ['null'],
+      'defense': ['null']
     }
   },
   'breach': {
@@ -84,99 +98,73 @@ const categoryMapping = {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター']
     },
-    'Fault Line': {
+    'Aftershock': {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター']
     }
   },
   'raze': {
-    'Blast Pack': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
-    },
     'Paint Shells': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'attack': ['ガジェット破壊'],
+      'defense': ['開幕']
     }
   },
   'skye': {
-    'Trailblazer': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
-    },
     'Guiding Light': {
       'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'defense': ['開幕', 'カウンター', 'リテイク']
     }
   },
   'yoru': {
     'Blindside': {
       'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'defense': ['開幕', 'カウンター', 'リテイク']
     },
     'Gatecrash': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
-    }
-  },
-  'astra': {
-    'Nova Pulse': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
-    },
-    'Nebula': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'attack': ['きもテレポ'],
+      'defense': ['きもテレポ']
     }
   },
   'kayo': {
     'Flash/Drive': {
       'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'defense': ['開幕', 'カウンター', 'リテイク']
     },
     'Zero/Point': {
       'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'defense': ['開幕', 'カウンター', 'リテイク']
     }
   },
   'neon': {
-    'Fast Lane': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
-    },
     'Relay Bolt': {
       'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'defense': ['開幕', 'カウンター', 'リテイク']
     }
   },
   'fade': {
     'Seize': {
       'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'defense': ['開幕', 'カウンター', 'リテイク']
     },
     'Haunt': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'attack': ['メイン＆ミッド取り', 'エントリー', 'リテイク阻止'],
+      'defense': ['開幕', 'カウンター', 'リテイク']
     }
   },
   'harbor': {
     'Cove': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
-    },
-    'High Tide': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
+      'attack': ['ノーマルモク'],
+      'defense': ['ノーマルモク']
     }
   },
   'gekko': {
-    'Wingman': {
-      'attack': ['エントリー', 'リテイク阻止'],
-      'defense': ['開幕', 'カウンター']
-    },
     'Dizzy': {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター']
+    },
+    'Moshpit': {
+      'attack': ['エントリー', '解除阻止'],
+      'defense': ['リテイク']
     }
   },
   'deadlock': {
@@ -187,11 +175,15 @@ const categoryMapping = {
     'Barrier Mesh': {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター']
+    },
+    'Gravnet ': {
+      'attack': ['エントリー', 'リテイク阻止'],
+      'defense': ['開幕', 'カウンター', 'リテイク']
     }
   },
   'clove': {
     'Meddle': {
-      'attack': ['エントリー', 'リテイク阻止'],
+      'attack': ['エントリー'],
       'defense': ['開幕', 'カウンター']
     }
   }
