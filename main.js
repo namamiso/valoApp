@@ -1,5 +1,11 @@
-const { app, BrowserWindow } = require('electron');
-const path = require('path');
+// ESモジュールのインポート
+import { app, BrowserWindow } from 'electron';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// __dirnameの設定（ESモジュール用）
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -7,22 +13,25 @@ function createWindow() {
         height: 720,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false,
-            enableRemoteModule: true,
-            webSecurity: false
+            contextIsolation: true,
+            enableRemoteModule: false,
+            webSecurity: true,
+            preload: path.join(__dirname, 'preload.js')
         }
     });
 
     // レンダラープロセスに必要な情報を提供
     win.webContents.on('did-finish-load', () => {
         win.webContents.executeJavaScript(`
-            window.__dirname = "${__dirname.replace(/\\/g, '\\\\')}";
-            window.process = process;
+            window.process = {
+                cwd: () => "${process.cwd().replace(/\\/g, '\\\\')}",
+                platform: "${process.platform}"
+            };
         `);
     });
 
     win.loadFile('index.html');
-    
+
     // 開発者ツールを開く
     win.webContents.openDevTools();
 }

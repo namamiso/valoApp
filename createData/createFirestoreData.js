@@ -26,11 +26,11 @@ const categoryMapping = {
     }
   },
   'sova': {
-    'Recon Bolt': {
+    'Recon_Bolt': {
       'attack': ['メイン＆ミッド取り', 'エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター', 'リテイク']
     },
-    'Shock Bolt': {
+    'Shock_Bolt': {
       'attack': ['解除阻止', 'ガジェット破壊'],
       'defense': ['開幕', '設置阻止', 'ガジェット破壊']
     }
@@ -40,27 +40,27 @@ const categoryMapping = {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['カウンター']
     },
-    'Hot Hands': {
+    'Hot_Hands': {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター']
     }
   },
   'sage': {
-    'Barrier Orb': {
+    'Barrier_Orb': {
       'attack': ['設置位置'],
       'defense': ['きも壁']
     },
-    'Slow Orb': {
+    'Slow_Orb': {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター']
     }
   },
   'cypher': {
-    'Spy Cam': {
+    'Spycam': {
       'attack': ['null'],
       'defense': ['null']
     },
-    'Cyber Cage': {
+    'Cyber_Cage': {
       'attack': ['null'],
       'defense': ['null']
     },
@@ -70,17 +70,17 @@ const categoryMapping = {
     }
   },
   'brimstone': {
-    'Incendiary': {
+    'incendiary': {
       'attack': ['エントリー', 'リテイク阻止', '解除阻止'],
       'defense': ['カウンター', 'リテイク']
     }
   },
   'viper': {
-    'Poison Cloud': {
+    'Poison_Cloud': {
       'attack': ['ノーマルモク', '解除ワンウェイ'],
       'defense': ['ノーマルモク', 'ワンウェイ']
     },
-    'Toxic Screen': {
+    'Toxic_Screen': {
       'attack': ['null'],
       'defense': ['null']
     },
@@ -88,7 +88,7 @@ const categoryMapping = {
       'attack': ['エントリー', 'リテイク阻止', '解除阻止'],
       'defense': ['設置阻止', 'リテイク']
     },
-    'Vipers Pit': {
+    'Vipers_Pit': {
       'attack': ['null'],
       'defense': ['null']
     }
@@ -104,13 +104,13 @@ const categoryMapping = {
     }
   },
   'raze': {
-    'Paint Shells': {
+    'Paint_Shells': {
       'attack': ['ガジェット破壊'],
       'defense': ['開幕']
     }
   },
   'skye': {
-    'Guiding Light': {
+    'Guiding_Light': {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター', 'リテイク']
     }
@@ -126,17 +126,17 @@ const categoryMapping = {
     }
   },
   'kayo': {
-    'Flash/Drive': {
+    'FLASH-drive': {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター', 'リテイク']
     },
-    'Zero/Point': {
+    'ZERO-point': {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター', 'リテイク']
     }
   },
   'neon': {
-    'Relay Bolt': {
+    'Relay_Bolt': {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター', 'リテイク']
     }
@@ -162,21 +162,21 @@ const categoryMapping = {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター']
     },
-    'Moshpit': {
+    'Mosh_Pit': {
       'attack': ['エントリー', '解除阻止'],
       'defense': ['リテイク']
     }
   },
   'deadlock': {
-    'Sonic Sensor': {
+    'Sonic_Sensor': {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター']
     },
-    'Barrier Mesh': {
+    'Barrier_Mesh': {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター']
     },
-    'Gravnet ': {
+    'GravNet': {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター', 'リテイク']
     }
@@ -194,8 +194,8 @@ const positions = [
   {
     agent: "sova",
     map: "ascent",
-    skill: "Recon Bolt",
-    category: ["メイン＆ミッド取り", "ガジェット破壊"],
+    skill: "Recon_Bolt",
+    category: ["メイン＆ミッド取り"],
     description: "Aサイトへのエントリー用",
     throwType: "その場投げ",
     position: { x: 30, y: 40 },
@@ -205,8 +205,8 @@ const positions = [
   {
     agent: "sova",
     map: "bind",
-    skill: "Shock Bolt",
-    category: ["エントリー", "リテイク阻止"],
+    skill: "Shock_Bolt",
+    category: ["エントリー"],
     description: "Bサイトへのエントリー用",
     throwType: "ジャンプ投げ",
     position: { x: 45, y: 60 },
@@ -216,7 +216,7 @@ const positions = [
   {
     agent: "cypher",
     map: "split",
-    skill: "Spy Cam",
+    skill: "Spycam",
     category: ["開幕", "カウンター"],
     description: "Aサイトの監視用",
     throwType: "その場投げ",

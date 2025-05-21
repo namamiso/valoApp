@@ -65,24 +65,24 @@ function resolvePath(relativePath) {
 function initialize() {
     // エージェントボタンの生成
     generateAgentButtons();
-    
+
     // 初期マップの設定
     updateMapDisplay();
-    
+
     // 初期マップボタンのアクティブ状態を設定
     document.querySelectorAll('.map-btn').forEach(button => {
         if (button.dataset.map === currentMap) {
             button.classList.add('active');
         }
     });
-    
+
     // 初期サイドボタンのアクティブ状態を設定
     sideButtons.forEach(button => {
         if (button.dataset.side === currentSide) {
             button.classList.add('active');
         }
     });
-    
+
     // イベントリスナーの設定
     setupEventListeners();
 }
@@ -134,11 +134,11 @@ function generateAgentButtons() {
         const button = document.createElement('button');
         button.className = 'agent-btn';
         button.dataset.agent = agent.id;
-        
+
         const img = document.createElement('img');
         img.src = resolvePath(`assets/agents/${agent.name}.png`);
         img.alt = agent.name;
-        
+
         button.appendChild(img);
         agentButtons.appendChild(button);
 
@@ -146,7 +146,7 @@ function generateAgentButtons() {
             document.querySelectorAll('.agent-btn').forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
             currentAgent = agent.id;
-            displaySkills(agent.id, currentSide);
+            displaySkills(agent.id);
             loadPoints();
         });
     });
@@ -263,6 +263,27 @@ function setupEventListeners() {
         positionX.textContent = '50.0';
         positionY.textContent = '50.0';
     });
+
+    // ステップナビゲーション
+    document.querySelectorAll('.next-step-btn').forEach(button => {
+        button.addEventListener('click', goToNextStep);
+    });
+
+    document.querySelectorAll('.prev-step-btn').forEach(button => {
+        button.addEventListener('click', goToPrevStep);
+    });
+
+    // マップ選択（ステップ1）
+    document.querySelectorAll('#step1 .map-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('#step1 .map-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            selectedMap = button.dataset.map;
+            document.querySelector('#step1 .next-step-btn').disabled = false;
+        });
+    });
 }
 
 // マップ表示の更新
@@ -275,7 +296,7 @@ function updateMapDisplay() {
 // 定点の読み込み
 async function loadPoints() {
     if (!currentMap || !currentAgent || !currentSide) return;
-    
+
     try {
         currentPoints = await fetchPoints(currentMap, currentAgent, currentSide);
         displayPoints(currentPoints);
@@ -359,57 +380,54 @@ function isSpecialSkill(agent, skill) {
 }
 
 // スキルアイコンの表示
-function displaySkills(agent, side) {
-    const skills = getAgentSkills(agent);
-    const skillContainer = document.createElement('div');
-    skillContainer.className = 'skill-buttons';
+function displaySkills(agent) {
+    const skillsContainer = document.getElementById('skillsContainer');
+    skillsContainer.innerHTML = '';
+
+    // カテゴリマッピングからスキルを取得
+    const skills = Object.keys(categoryMapping[agent] || {});
+    
+    // スキルボタンのグリッドを作成
+    const skillsGrid = document.createElement('div');
+    skillsGrid.className = 'skills-grid';
     
     skills.forEach(skill => {
-        const button = document.createElement('button');
-        button.className = 'skill-btn';
-        button.dataset.skill = skill;
-        
-        const img = document.createElement('img');
-        // スキル名をファイル名に変換
-        const skillFileName = skill
-            .replace(/\s+/g, '_')  // スペースをアンダースコアに変換
-            .replace(/'/g, '')     // アポストロフィを削除
-            .replace(/-/g, '')     // ハイフンを削除
-            .replace(/\//g, '')    // スラッシュを削除
-            .replace(/^([A-Z])/, (match) => match.toUpperCase()); // 最初の文字を大文字に
-        const imagePath = resolvePath(`assets/skills/${skillFileName}.webp`);
-        console.log('Loading skill image:', imagePath); // デバッグ用ログ
-        img.src = imagePath;
-        img.alt = skill;
-        
-        button.appendChild(img);
-        skillContainer.appendChild(button);
+        const skillButton = document.createElement('button');
+        skillButton.className = 'skill-button';
+        skillButton.dataset.skill = skill;
 
-        button.addEventListener('click', () => {
-            document.querySelectorAll('.skill-btn').forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            
-            // 特定スキルの場合はカテゴリ選択をスキップ
-            if (isSpecialSkill(agent, skill)) {
-                const points = currentPoints.filter(point => 
-                    point.agent === agent && 
-                    point.skill === skill && 
-                    point.side === side
-                );
-                displayPoints(points);
-            } else {
-                displayCategories(agent, skill, side);
-            }
+        // スキルアイコンの画像を設定
+        const skillIcon = document.createElement('img');
+        const imagePath = `assets/skills/${skill}.webp`;
+        console.log('Loading skill image:', imagePath); // デバッグ用ログ
+        skillIcon.src = imagePath;
+        skillIcon.alt = skill;
+        skillIcon.onerror = function() {
+            console.warn(`Failed to load image: ${imagePath}`); // デバッグ用ログ
+            // エラー時は空の画像を表示
+            this.style.display = 'none';
+        };
+
+        const skillName = document.createElement('span');
+        skillName.textContent = skill;
+
+        skillButton.appendChild(skillIcon);
+        skillButton.appendChild(skillName);
+
+        // スキル選択時のイベントリスナー
+        skillButton.addEventListener('click', () => {
+            document.querySelectorAll('.skill-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            skillButton.classList.add('selected');
+            selectedSkill = skill;
+            nextStepBtn.disabled = false;
         });
+
+        skillsGrid.appendChild(skillButton);
     });
 
-    // 既存のスキルボタンを置き換え
-    const existingSkills = document.querySelector('.skill-buttons');
-    if (existingSkills) {
-        existingSkills.replaceWith(skillContainer);
-    } else {
-        document.querySelector('.side-selection').after(skillContainer);
-    }
+    skillsContainer.appendChild(skillsGrid);
 }
 
 // カテゴリの表示
@@ -420,9 +438,9 @@ function displayCategories(agent, skill, side) {
 
     // カテゴリが存在しない場合は定点を直接表示
     if (categories.length === 0) {
-        const points = currentPoints.filter(point => 
-            point.agent === agent && 
-            point.skill === skill && 
+        const points = currentPoints.filter(point =>
+            point.agent === agent &&
+            point.skill === skill &&
             point.side === side
         );
         displayPoints(points);
@@ -439,7 +457,7 @@ function displayCategories(agent, skill, side) {
         button.addEventListener('click', () => {
             document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-            const filteredPoints = currentPoints.filter(point => 
+            const filteredPoints = currentPoints.filter(point =>
                 point.agent === agent &&
                 point.skill === skill &&
                 point.side === side &&
@@ -514,155 +532,14 @@ initialize();
 
 // ステップの表示を更新
 function updateStepDisplay() {
+    // すべてのステップを非表示
     document.querySelectorAll('.add-point-step').forEach(step => {
         step.style.display = 'none';
     });
-    document.getElementById(`step${currentStep}`).style.display = 'block';
-}
 
-// ステップの移動
-function goToNextStep() {
-    if (currentStep < 5) {
-        currentStep++;
-        updateStepDisplay();
+    // 現在のステップを表示
+    const currentStepElement = document.getElementById(`step${currentStep}`);
+    if (currentStepElement) {
+        currentStepElement.style.display = 'block';
     }
-}
-
-function goToPrevStep() {
-    if (currentStep > 1) {
-        currentStep--;
-        updateStepDisplay();
-    }
-}
-
-// マップ選択のイベントリスナー
-document.querySelectorAll('#step1 .map-btn').forEach(button => {
-    button.addEventListener('click', () => {
-        document.querySelectorAll('#step1 .map-btn').forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        selectedMap = button.dataset.map;
-        document.querySelector('#step1 .next-step-btn').disabled = false;
-    });
-});
-
-// エージェント選択のイベントリスナー
-document.querySelectorAll('#step2 .agent-btn').forEach(button => {
-    button.addEventListener('click', () => {
-        document.querySelectorAll('#step2 .agent-btn').forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        selectedAgent = button.dataset.agent;
-        document.querySelector('#step2 .next-step-btn').disabled = false;
-    });
-});
-
-// スキル選択のイベントリスナー
-document.getElementById('pointSkill').addEventListener('change', () => {
-    selectedSkill = document.getElementById('pointSkill').value;
-    document.querySelector('#step3 .next-step-btn').disabled = !selectedSkill;
-});
-
-// サイド選択のイベントリスナー
-document.querySelectorAll('#step4 .side-btn').forEach(button => {
-    button.addEventListener('click', () => {
-        document.querySelectorAll('#step4 .side-btn').forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        selectedSide = button.dataset.side;
-        document.querySelector('#step4 .next-step-btn').disabled = false;
-    });
-});
-
-// ステップ移動ボタンのイベントリスナー
-document.querySelectorAll('.next-step-btn').forEach(button => {
-    button.addEventListener('click', goToNextStep);
-});
-
-document.querySelectorAll('.prev-step-btn').forEach(button => {
-    button.addEventListener('click', goToPrevStep);
-});
-
-// 位置調整のイベントリスナー
-document.querySelectorAll('.position-btn').forEach(button => {
-    button.addEventListener('click', () => {
-        const direction = button.dataset.direction;
-        const step = 0.5; // 0.5%ずつ移動
-
-        switch (direction) {
-            case 'up':
-                selectedPosition.y = Math.max(0, selectedPosition.y - step);
-                break;
-            case 'down':
-                selectedPosition.y = Math.min(100, selectedPosition.y + step);
-                break;
-            case 'left':
-                selectedPosition.x = Math.max(0, selectedPosition.x - step);
-                break;
-            case 'right':
-                selectedPosition.x = Math.min(100, selectedPosition.x + step);
-                break;
-        }
-
-        positionMarker.style.left = `${selectedPosition.x}%`;
-        positionMarker.style.top = `${selectedPosition.y}%`;
-        positionX.textContent = selectedPosition.x.toFixed(1);
-        positionY.textContent = selectedPosition.y.toFixed(1);
-    });
-});
-
-// 画像アップロードの制限
-document.getElementById('pointImages').addEventListener('change', (e) => {
-    const files = e.target.files;
-    if (files.length > 5) {
-        alert('画像は最大5枚までアップロードできます');
-        e.target.value = '';
-        return;
-    }
-
-    imagePreview.innerHTML = '';
-    Array.from(files).forEach(file => {
-        if (!file.type.startsWith('image/')) {
-            alert('画像ファイルのみアップロードできます');
-            e.target.value = '';
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            imagePreview.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-    });
-});
-
-// マップのズーム処理
-mapDisplay.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    scale = Math.min(Math.max(0.5, scale * delta), 4);
-    updateMapTransform();
-});
-
-// マップのパン処理
-mapDisplay.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    mapDisplay.classList.add('grabbing');
-    startX = e.clientX - translateX;
-    startY = e.clientY - translateY;
-});
-
-document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    translateX = e.clientX - startX;
-    translateY = e.clientY - startY;
-    updateMapTransform();
-});
-
-document.addEventListener('mouseup', () => {
-    isDragging = false;
-    mapDisplay.classList.remove('grabbing');
-});
-
-// マップの変形を更新
-function updateMapTransform() {
-    mapContainer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
 }
