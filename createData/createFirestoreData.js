@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -133,6 +133,10 @@ const categoryMapping = {
     'Zero/Point': {
       'attack': ['エントリー', 'リテイク阻止'],
       'defense': ['開幕', 'カウンター', 'リテイク']
+    },
+    'Flag/Ment': {
+      'attack': ['エントリー', 'リテイク阻止'],
+      'defense': ['リテイク', '設置阻止']
     }
   },
   'neon': {
@@ -164,7 +168,7 @@ const categoryMapping = {
     },
     'Moshpit': {
       'attack': ['エントリー', '解除阻止'],
-      'defense': ['リテイク']
+      'defense': ['リテイク', '設置阻止']
     }
   },
   'deadlock': {
@@ -185,6 +189,28 @@ const categoryMapping = {
     'Meddle': {
       'attack': ['エントリー'],
       'defense': ['開幕', 'カウンター']
+    }
+  },
+  'vise': {
+    'Arc Rose': {
+      'attack': ['null'],
+      'defense': ['開幕']
+    },
+    'Razorvine': {
+      'attack': ['開幕'],
+      'defense': ['開幕']
+    }
+  },
+  'tejo': {
+    'Special Delivery': {
+      'attack': ['開幕'],
+      'defense': ['リテイク']
+    }
+  },
+  'waylay': {
+    'Saturate': {
+      'attack': ['開幕'],
+      'defense': ['リテイク']
     }
   }
 };
@@ -229,6 +255,13 @@ const positions = [
 // データをFirestoreに追加する関数
 async function addDataToFirestore() {
   try {
+    // 既存のデータをすべて削除
+    const existingCategories = await getDocs(collection(db, "skillCategories"));
+    for (const doc of existingCategories.docs) {
+      await deleteDoc(doc.ref);
+    }
+    console.log("既存のカテゴリデータを削除しました");
+
     // カテゴリマッピングの追加
     for (const [agent, skills] of Object.entries(categoryMapping)) {
       for (const [skill, sides] of Object.entries(skills)) {
@@ -241,17 +274,17 @@ async function addDataToFirestore() {
       }
     }
 
-    // ポジションデータの追加
+    // 定点データの追加
     for (const position of positions) {
       const docRef = await addDoc(collection(db, "positions"), position);
-      console.log("ポジションデータ追加成功:", docRef.id);
+      console.log("定点データ追加成功:", docRef.id);
     }
 
     console.log("すべてのデータの追加が完了しました");
   } catch (error) {
-    console.error("エラーが発生しました:", error);
+    console.error("データの追加中にエラーが発生しました:", error);
   }
 }
 
-// データ追加の実行
+// 関数を実行
 addDataToFirestore();

@@ -1,4 +1,4 @@
-import { fetchPoints, categoryMapping, getAgentSkills } from './firebase.js';
+const { fetchPoints, categoryMapping, getAgentSkills } = require('./firebase.js');
 
 // グローバル変数
 let currentMap = 'Ascent';
@@ -105,20 +105,21 @@ function generateMapButtons() {
 // エージェントボタンの生成
 function generateAgentButtons() {
     const agents = [
-        { id: 'sova', name: 'Sova' },
-        // { id: 'jett', name: 'Jett' },
+        { id: 'brimstone', name: 'Brimstone' },
         { id: 'phoenix', name: 'Phoenix' },
         { id: 'sage', name: 'Sage' },
-        { id: 'cypher', name: 'Cypher' },
-        { id: 'brimstone', name: 'Brimstone' },
+        { id: 'sova', name: 'Sova' },
         { id: 'viper', name: 'Viper' },
+        { id: 'cypher', name: 'Cypher' },
         // { id: 'reyna', name: 'Reyna' },
+        { id: 'killjoy', name: 'Killjoy' },
         { id: 'breach', name: 'Breach' },
         // { id: 'omen', name: 'Omen' },
+        // { id: 'jett', name: 'Jett' },
         { id: 'raze', name: 'Raze' },
         { id: 'skye', name: 'Skye' },
         { id: 'yoru', name: 'Yoru' },
-        { id: 'astra', name: 'Astra' },
+        // { id: 'astra', name: 'Astra' },
         { id: 'kayo', name: 'KAY_O' },
         // { id: 'chamber', name: 'Chambar' },
         { id: 'neon', name: 'Neon' },
@@ -127,18 +128,21 @@ function generateAgentButtons() {
         { id: 'gekko', name: 'Gekko' },
         { id: 'deadlock', name: 'Deadlock' },
         // { id: 'iso', name: 'Iso' },
-        { id: 'clove', name: 'Clove' }
+        { id: 'clove', name: 'Clove' },
+        { id: 'vise', name: 'Vise' },
+        { id: 'tejo', name: 'Tejo' },
+        { id: 'waylay', name: 'Waylay' }
     ];
 
     agents.forEach(agent => {
         const button = document.createElement('button');
         button.className = 'agent-btn';
         button.dataset.agent = agent.id;
-        
+
         const img = document.createElement('img');
         img.src = resolvePath(`assets/agents/${agent.name}.png`);
         img.alt = agent.name;
-        
+
         button.appendChild(img);
         agentButtons.appendChild(button);
 
@@ -275,7 +279,7 @@ function updateMapDisplay() {
 // 定点の読み込み
 async function loadPoints() {
     if (!currentMap || !currentAgent || !currentSide) return;
-    
+
     try {
         currentPoints = await fetchPoints(currentMap, currentAgent, currentSide);
         displayPoints(currentPoints);
@@ -353,7 +357,15 @@ function updateSlider(point) {
 function isSpecialSkill(agent, skill) {
     const specialSkills = {
         'cypher': ['Spy Cam'],
-        'viper': ['Viper\'s Pit']
+        'viper': ['Viper\'s Pit'],
+        'astra': ['Nova Pulse', 'Nebula', 'Astral Form'],
+        'kayo': ['ZERO/point'],
+        'neon': ['Fast Lane', 'Overdrive'],
+        'fade': ['Haunt', 'Seize'],
+        'harbor': ['Cove', 'High Tide'],
+        'gekko': ['Wingman', 'Mosh Pit'],
+        'deadlock': ['Sonic Sensor', 'Barrier Mesh'],
+        'clove': ['Meddle', 'Ruse']
     };
     return specialSkills[agent]?.includes(skill) || false;
 }
@@ -363,37 +375,36 @@ function displaySkills(agent, side) {
     const skills = getAgentSkills(agent);
     const skillContainer = document.createElement('div');
     skillContainer.className = 'skill-buttons';
-    
+
     skills.forEach(skill => {
         const button = document.createElement('button');
         button.className = 'skill-btn';
         button.dataset.skill = skill;
-        
+
         const img = document.createElement('img');
         // スキル名をファイル名に変換
         const skillFileName = skill
             .replace(/\s+/g, '_')  // スペースをアンダースコアに変換
             .replace(/'/g, '')     // アポストロフィを削除
             .replace(/-/g, '')     // ハイフンを削除
-            .replace(/\//g, '')    // スラッシュを削除
-            .replace(/^([A-Z])/, (match) => match.toUpperCase()); // 最初の文字を大文字に
+            .replace(/\//g, '');   // スラッシュを削除
         const imagePath = resolvePath(`assets/skills/${skillFileName}.webp`);
         console.log('Loading skill image:', imagePath); // デバッグ用ログ
         img.src = imagePath;
         img.alt = skill;
-        
+
         button.appendChild(img);
         skillContainer.appendChild(button);
 
         button.addEventListener('click', () => {
             document.querySelectorAll('.skill-btn').forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-            
+
             // 特定スキルの場合はカテゴリ選択をスキップ
             if (isSpecialSkill(agent, skill)) {
-                const points = currentPoints.filter(point => 
-                    point.agent === agent && 
-                    point.skill === skill && 
+                const points = currentPoints.filter(point =>
+                    point.agent === agent &&
+                    point.skill === skill &&
                     point.side === side
                 );
                 displayPoints(points);
@@ -420,9 +431,9 @@ function displayCategories(agent, skill, side) {
 
     // カテゴリが存在しない場合は定点を直接表示
     if (categories.length === 0) {
-        const points = currentPoints.filter(point => 
-            point.agent === agent && 
-            point.skill === skill && 
+        const points = currentPoints.filter(point =>
+            point.agent === agent &&
+            point.skill === skill &&
             point.side === side
         );
         displayPoints(points);
@@ -439,7 +450,7 @@ function displayCategories(agent, skill, side) {
         button.addEventListener('click', () => {
             document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-            const filteredPoints = currentPoints.filter(point => 
+            const filteredPoints = currentPoints.filter(point =>
                 point.agent === agent &&
                 point.skill === skill &&
                 point.side === side &&

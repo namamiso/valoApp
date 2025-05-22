@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Valorant定点情報管理アプリ",
   "main": "main.js",
-  "type": "module",
   "scripts": {
     "start": "electron .",
     "create-data": "node createData/createFirestoreData.js",

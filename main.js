@@ -9,7 +9,9 @@ function createWindow() {
             nodeIntegration: true,
             contextIsolation: false,
             enableRemoteModule: true,
-            webSecurity: false
+            webSecurity: false,
+            allowRunningInsecureContent: true,
+            preload: path.join(__dirname, 'preload.js')
         }
     });
 
@@ -22,7 +24,7 @@ function createWindow() {
     });
 
     win.loadFile('index.html');
-    
+
     // 開発者ツールを開く
     win.webContents.openDevTools();
 }

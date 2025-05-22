@@ -404,8 +404,8 @@ body {
 /* フローティングボタン */
 .floating-buttons {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    top: 20px;
+    right: 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -413,21 +413,22 @@ body {
 }
 
 .floating-btn {
+    background-color: #2a3441;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
-    background-color: #ff4655;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 24px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    font-weight: 500;
 }
 
 .floating-btn:hover {
-    background-color: #ff6b77;
+    background-color: #3a4451;
+    transform: translateY(-2px);
 }
 
 /* お気に入り一覧 */
