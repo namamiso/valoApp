@@ -1,29 +1,15 @@
 // ESモジュールのインポート
-import { app, BrowserWindow } from 'electron';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// __dirnameの設定（ESモジュール用）
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const { app, BrowserWindow } = require('electron');
+const path = require('path');
 
 function createWindow() {
     const win = new BrowserWindow({
-        width: 1280,
-        height: 720,
+        width: 1200,
+        height: 800,
         webPreferences: {
             nodeIntegration: true,
-<<<<<<< HEAD
             contextIsolation: false,
-            enableRemoteModule: true,
-            webSecurity: false,
-            allowRunningInsecureContent: true,
-=======
-            contextIsolation: true,
-            enableRemoteModule: false,
-            webSecurity: true,
->>>>>>> 36fe725aaff824288bfae80b06d82c23dc69a13b
-            preload: path.join(__dirname, 'preload.js')
+            webSecurity: false
         }
     });
 

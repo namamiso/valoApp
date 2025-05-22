@@ -1,4 +1,4 @@
-const { fetchPoints, categoryMapping, getAgentSkills } = require('./firebase.js');
+const { fetchPoints, getAgentSkills, getCategoryMapping } = require('./firebase.js');
 
 // グローバル変数
 let currentMap = 'Ascent';
@@ -392,54 +392,16 @@ function isSpecialSkill(agent, skill) {
 }
 
 // スキルアイコンの表示
-<<<<<<< HEAD
-function displaySkills(agent, side) {
-    const skills = getAgentSkills(agent);
-    const skillContainer = document.createElement('div');
-    skillContainer.className = 'skill-buttons';
-
-    skills.forEach(skill => {
-        const button = document.createElement('button');
-        button.className = 'skill-btn';
-        button.dataset.skill = skill;
-
-        const img = document.createElement('img');
-        // スキル名をファイル名に変換
-        const skillFileName = skill
-            .replace(/\s+/g, '_')  // スペースをアンダースコアに変換
-            .replace(/'/g, '')     // アポストロフィを削除
-            .replace(/-/g, '')     // ハイフンを削除
-            .replace(/\//g, '');   // スラッシュを削除
-        const imagePath = resolvePath(`assets/skills/${skillFileName}.webp`);
-        console.log('Loading skill image:', imagePath); // デバッグ用ログ
-        img.src = imagePath;
-        img.alt = skill;
-
-        button.appendChild(img);
-        skillContainer.appendChild(button);
-
-        button.addEventListener('click', () => {
-            document.querySelectorAll('.skill-btn').forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-
-            // 特定スキルの場合はカテゴリ選択をスキップ
-            if (isSpecialSkill(agent, skill)) {
-                const points = currentPoints.filter(point =>
-                    point.agent === agent &&
-                    point.skill === skill &&
-                    point.side === side
-                );
-                displayPoints(points);
-            } else {
-                displayCategories(agent, skill, side);
-            }
-=======
 function displaySkills(agent) {
-    const skillsContainer = document.getElementById('skillsContainer');
+    const skillsContainer = document.querySelector('.skill-buttons');
+    if (!skillsContainer) {
+        console.error('スキルコンテナが見つかりません');
+        return;
+    }
     skillsContainer.innerHTML = '';
 
     // カテゴリマッピングからスキルを取得
-    const skills = Object.keys(categoryMapping[agent] || {});
+    const skills = getAgentSkills(agent);
     
     // スキルボタンのグリッドを作成
     const skillsGrid = document.createElement('div');
@@ -476,7 +438,6 @@ function displaySkills(agent) {
             skillButton.classList.add('selected');
             selectedSkill = skill;
             nextStepBtn.disabled = false;
->>>>>>> 36fe725aaff824288bfae80b06d82c23dc69a13b
         });
 
         skillsGrid.appendChild(skillButton);
@@ -487,7 +448,7 @@ function displaySkills(agent) {
 
 // カテゴリの表示
 function displayCategories(agent, skill, side) {
-    const categories = categoryMapping[agent]?.[skill]?.[side] || [];
+    const categories = getCategoryMapping()[agent]?.[skill]?.[side] || [];
     const categoryButtons = document.querySelector('.category-buttons');
     categoryButtons.innerHTML = '';
 
