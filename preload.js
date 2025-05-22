@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const { contextBridge } = require('electron');
 const path = require('path');
 
@@ -20,3 +21,12 @@ window.path = path;
 // Firebaseモジュールをグローバルに公開
 window.firebase = firebase;
 window.firestore = firestore; 
+=======
+import { contextBridge } from 'electron';
+
+// レンダラープロセスに公開するAPI
+contextBridge.exposeInMainWorld('electronAPI', {
+    // 必要に応じてAPIを追加
+    getAppPath: () => process.cwd()
+}); 
+>>>>>>> 36fe725aaff824288bfae80b06d82c23dc69a13b

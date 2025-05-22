@@ -13,5 +13,8 @@
   "dependencies": {
     "electron": "^28.3.3",
     "firebase": "^10.14.1"
+  },
+  "devDependencies": {
+    "electron-reload": "^2.0.0-alpha.1"
   }
 }

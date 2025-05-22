@@ -5,16 +5,45 @@
     box-sizing: border-box;
 }
 
+/* スクロールバーのカスタマイズ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1f2731;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2a3441;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3a4451;
+}
+
+/* Firefox用のスクロールバー */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #2a3441 #1f2731;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #0f1923;
     color: #ece8e1;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 .container {
     display: grid;
     grid-template-rows: 1fr auto;
-    height: 100vh;
+    min-height: 100vh;
     padding: 20px;
     gap: 20px;
 }
@@ -22,25 +51,32 @@ body {
 /* メインコンテンツエリア */
 .main-content {
     display: grid;
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: minmax(250px, 300px) 1fr;
     gap: 20px;
-    height: calc(100vh - 160px); /* エージェント選択エリアの高さを考慮して調整 */
+    height: calc(100vh - 160px);
+    align-items: start;
+    overflow: hidden;
 }
 
 /* マップ選択エリア */
 .map-selection {
     background-color: #1f2731;
-    padding: 15px;
+    padding: 20px;
     border-radius: 8px;
     height: fit-content;
-    width: 200px;
+    width: 100%;
+    position: sticky;
+    top: 20px;
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
 }
 
 .map-buttons {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 10px;
     margin: 15px 0;
+    font-size: 16px;
 }
 
 .map-btn {
@@ -69,6 +105,7 @@ body {
     display: flex;
     gap: 10px;
     margin-top: 15px;
+    padding-top: 30px;
 }
 
 .side-btn {
@@ -81,6 +118,7 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 500;
+    font-size: 20px;
 }
 
 .side-btn:hover {
@@ -120,8 +158,8 @@ body {
 }
 
 .map-display img {
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 100%;
+    max-height: 100%;
     width: auto;
     height: auto;
     object-fit: contain;
@@ -149,15 +187,16 @@ body {
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-    height: 140px; /* エージェントボタンの高さをさらに増加 */
+    height: 120px;
+    position: relative;
 }
 
 .agent-buttons {
     display: flex;
-    flex-wrap: nowrap;
     gap: 10px;
+    padding: 10px 0;
     min-width: min-content;
-    padding: 10px 0; /* パディングを増加 */
+    height: 100%;
 }
 
 .agent-btn {
@@ -167,8 +206,8 @@ body {
     padding: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    width: 80px; /* エージェントボタンのサイズをさらに調整 */
-    height: 80px;
+    width: 70px;
+    height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -278,6 +317,7 @@ body {
     gap: 10px;
     margin: 15px 0;
     padding: 0 15px;
+    padding-top: 30px;
     justify-content: center;
 }
 
@@ -288,8 +328,8 @@ body {
     padding: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    width: 48px;
-    height: 48px;
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -319,7 +359,7 @@ body {
     flex-wrap: wrap;
     gap: 10px;
     margin: 15px 0;
-    padding: 0 15px;
+    padding: 30px 15px;
     justify-content: center;
 }
 
@@ -331,7 +371,7 @@ body {
     color: #fff;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 14px;
+    font-size: 18px;
     white-space: nowrap;
 }
 
@@ -768,31 +808,98 @@ body {
     display: block;
 }
 
-/* フォームのエラー表示 */
-.form-group input.error,
-.form-group select.error,
-.form-group textarea.error {
-    border-color: #ff4655;
-    box-shadow: 0 0 5px rgba(255, 70, 85, 0.5);
+/* レスポンシブ対応 */
+@media screen and (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .map-selection {
+        position: relative;
+        top: 0;
+        max-height: none;
+    }
+
+    .map-buttons {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+
+    .agent-selection {
+        height: 100px;
+    }
+
+    .agent-btn {
+        width: 60px;
+        height: 60px;
+    }
 }
 
-.form-group input.error:focus,
-.form-group select.error:focus,
-.form-group textarea.error:focus {
-    outline: none;
-    border-color: #ff4655;
-    box-shadow: 0 0 8px rgba(255, 70, 85, 0.7);
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .main-content {
+        gap: 10px;
+    }
+
+    .map-selection {
+        padding: 15px;
+    }
+
+    .map-buttons {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        font-size: 14px;
+    }
+
+    .agent-selection {
+        height: 90px;
+    }
+
+    .agent-btn {
+        width: 50px;
+        height: 50px;
+    }
 }
 
-.form-group .error-message {
-    color: #ff4655;
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    padding: 10px;
+}
+
+.skill-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #2a3441;
+    border-radius: 8px;
+    background: #1f2731;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.skill-button:hover {
+    background: #2a3441;
+    transform: translateY(-2px);
+}
+
+.skill-button.selected {
+    background: #3a4451;
+    border-color: #4a5568;
+}
+
+.skill-button img {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+}
+
+.skill-button span {
     font-size: 12px;
-    margin-top: 5px;
-    display: none;
-}
-
-.form-group input.error + .error-message,
-.form-group select.error + .error-message,
-.form-group textarea.error + .error-message {
-    display: block;
+    color: #e2e8f0;
+    text-align: center;
 } 

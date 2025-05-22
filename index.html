@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com https://*.firebaseapp.com https://*.firebasestorage.app https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.cloudfunctions.net https://*.firebase.googleapis.com data: blob:; img-src 'self' data: blob: https://*.firebasestorage.app; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com https://*.firebaseapp.com https://*.firebasestorage.app wss://*.firebaseio.com https://*.cloudfunctions.net https://*.firebase.googleapis.com">
     <title>VALORANT 定点管理アプリ</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+    </script>
 </head>
 <body>
     <div class="container">
@@ -12,14 +18,14 @@
             <!-- マップ選択エリア -->
             <div class="map-selection">
                 <div class="map-buttons">
-                    <button class="map-btn" data-map="Ascent">Ascent</button>
-                    <button class="map-btn" data-map="Bind">Bind</button>
-                    <button class="map-btn" data-map="Haven">Haven</button>
-                    <button class="map-btn" data-map="Split">Split</button>
-                    <button class="map-btn" data-map="Icebox">Icebox</button>
-                    <button class="map-btn" data-map="Breeze">Breeze</button>
-                    <button class="map-btn" data-map="Pearl">Pearl</button>
-                    <button class="map-btn" data-map="Lotus">Lotus</button>
+                    <button class="map-btn" data-map="Ascent">アセント</button>
+                    <button class="map-btn" data-map="Bind">バインド</button>
+                    <button class="map-btn" data-map="Haven">ヘイブン</button>
+                    <button class="map-btn" data-map="Split">スプリット</button>
+                    <button class="map-btn" data-map="Icebox">アイスボックス</button>
+                    <button class="map-btn" data-map="Breeze">ブリーズ</button>
+                    <button class="map-btn" data-map="Pearl">パール</button>
+                    <button class="map-btn" data-map="Lotus">ロータス</button>
                 </div>
                 <div class="side-selection">
                     <button class="side-btn active" data-side="attack">攻め</button>
@@ -97,14 +103,14 @@
             <div id="step1" class="add-point-step">
                 <h3>マップを選択</h3>
                 <div class="map-buttons">
-                    <button class="map-btn" data-map="Ascent">Ascent</button>
-                    <button class="map-btn" data-map="Bind">Bind</button>
-                    <button class="map-btn" data-map="Haven">Haven</button>
-                    <button class="map-btn" data-map="Split">Split</button>
-                    <button class="map-btn" data-map="Icebox">Icebox</button>
-                    <button class="map-btn" data-map="Breeze">Breeze</button>
-                    <button class="map-btn" data-map="Pearl">Pearl</button>
-                    <button class="map-btn" data-map="Lotus">Lotus</button>
+                    <button class="map-btn" data-map="Ascent">アセント</button>
+                    <button class="map-btn" data-map="Bind">バインド</button>
+                    <button class="map-btn" data-map="Haven">ヘイブン</button>
+                    <button class="map-btn" data-map="Split">スプリット</button>
+                    <button class="map-btn" data-map="Icebox">アイスボックス</button>
+                    <button class="map-btn" data-map="Breeze">ブリーズ</button>
+                    <button class="map-btn" data-map="Pearl">パール</button>
+                    <button class="map-btn" data-map="Lotus">ロータス</button>
                 </div>
                 <div class="step-navigation">
                     <button class="next-step-btn" disabled>次へ</button>
