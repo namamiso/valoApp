@@ -1,6 +1,6 @@
 // Firebase SDKのインポート
-const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, query, where, getDocs, addDoc } = require('firebase/firestore');
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import { getFirestore, collection, query, where, getDocs, addDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
 // Firebase設定
 const firebaseConfig = {
@@ -37,6 +37,7 @@ async function initializeCategoryMapping() {
                 defense: data.defense || []
             };
         });
+        console.log('カテゴリマッピングの初期化完了:', categoryMapping);
     } catch (error) {
         console.error("Error initializing category mapping:", error);
     }
@@ -93,29 +94,12 @@ async function addPoint(point) {
 }
 
 // カテゴリマッピングを取得
-async function getCategoryMapping(agent, skill, side) {
-    try {
-        const categoriesRef = collection(db, "skillCategories");
-        const q = query(
-            categoriesRef,
-            where("agent", "==", agent),
-            where("skill", "==", skill)
-        );
-
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-            const doc = querySnapshot.docs[0];
-            return doc.data()[side] || [];
-        }
-        return [];
-    } catch (error) {
-        console.error("カテゴリマッピングの取得に失敗しました:", error);
-        return [];
-    }
+function getCategoryMapping() {
+    return categoryMapping;
 }
 
 // モジュールのエクスポート
-module.exports = {
+export {
     getAgentSkills,
     fetchPoints,
     addPoint,

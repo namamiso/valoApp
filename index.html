@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com https://*.firebaseapp.com https://*.firebasestorage.app https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.cloudfunctions.net https://*.firebase.googleapis.com data: blob:; img-src 'self' data: blob: https://*.firebasestorage.app; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com https://*.firebaseapp.com https://*.firebasestorage.app wss://*.firebaseio.com https://*.cloudfunctions.net https://*.firebase.googleapis.com">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com https://*.firebaseapp.com https://*.firebasestorage.app https://*.gstatic.com https://*.google.com https://*.cloudfunctions.net https://*.firebase.googleapis.com; img-src 'self' data: blob: https://*.firebasestorage.app; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com https://*.firebaseapp.com https://*.firebasestorage.app wss://*.firebaseio.com https://*.cloudfunctions.net https://*.firebase.googleapis.com">
     <title>VALORANT 定点管理アプリ</title>
     <link rel="stylesheet" href="style.css">
     <!-- Firebase SDK -->
@@ -11,6 +11,7 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
         import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
     </script>
+    <script type="module" src="script.js"></script>
 </head>
 <body>
     <div class="container">
@@ -218,8 +219,5 @@
             <span class="add-text">定点追加</span>
         </button>
     </div>
-
-    <script src="firebase.js" type="module"></script>
-    <script src="script.js" type="module"></script>
 </body>
 </html>

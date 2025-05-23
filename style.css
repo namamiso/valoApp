@@ -44,16 +44,16 @@ body {
     display: grid;
     grid-template-rows: 1fr auto;
     min-height: 100vh;
-    padding: 20px;
-    gap: 20px;
+    padding: 15px;
+    gap: 0px;
 }
 
 /* メインコンテンツエリア */
 .main-content {
     display: grid;
     grid-template-columns: minmax(250px, 300px) 1fr;
-    gap: 20px;
-    height: calc(100vh - 160px);
+    gap: 15px;
+    height: calc(100vh - 120px);
     align-items: start;
     overflow: hidden;
 }
@@ -88,16 +88,19 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 500;
+    opacity: 0.7;
 }
 
 .map-btn:hover {
     background-color: #3a4451;
     transform: translateY(-2px);
+    opacity: 0.9;
 }
 
 .map-btn.active {
     background-color: #ff4655;
     box-shadow: 0 0 10px rgba(255, 70, 85, 0.5);
+    opacity: 1;
 }
 
 /* サイド選択 */
@@ -135,15 +138,16 @@ body {
 .map-display {
     background-color: #1f2731;
     border-radius: 8px;
-    padding: 20px;
+    padding: 10px;
     position: relative;
     width: 100%;
-    height: 100%;
+    height: 90%;
     overflow: hidden;
     cursor: grab;
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-bottom: 5px;
 }
 
 .map-container {
@@ -182,19 +186,20 @@ body {
 /* エージェント選択エリア */
 .agent-selection {
     background-color: #1f2731;
-    padding: 15px;
+    padding: 10px;
     border-radius: 8px;
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-    height: 120px;
+    height: 100px;
     position: relative;
+    margin-top: -50px;
 }
 
 .agent-buttons {
     display: flex;
     gap: 10px;
-    padding: 10px 0;
+    padding: 5px 0;
     min-width: min-content;
     height: 100%;
 }
@@ -203,11 +208,11 @@ body {
     background-color: #2a3441;
     border: none;
     border-radius: 4px;
-    padding: 8px;
+    padding: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
-    width: 70px;
-    height: 70px;
+    width: 65px;
+    height: 65px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -388,25 +393,31 @@ body {
 /* 定点マーカー */
 .point-marker {
     position: absolute;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     transform: translate(-50%, -50%);
     cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid #fff;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
 }
 
 .point-marker:hover {
     transform: translate(-50%, -50%) scale(1.2);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
 }
 
-.point-marker img {
-    width: 100%;
-    height: 100%;
+.point-skill-icon {
+    width: 20px;
+    height: 20px;
     object-fit: contain;
+    border-radius: 50%;
+    background-color: #1f2731;
+    padding: 2px;
+    border: 1px solid #2a3441;
 }
 
 /* お気に入りボタン */
@@ -619,8 +630,9 @@ body {
 
 .step-navigation {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-top: 20px;
+    padding: 0 20px 20px 0;
 }
 
 .prev-step-btn,
@@ -628,20 +640,38 @@ body {
     background-color: #2a3441;
     color: white;
     border: none;
-    padding: 8px 16px;
+    padding: 12px 24px;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 16px;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .prev-step-btn:hover,
 .next-step-btn:hover:not(:disabled) {
     background-color: #3a4451;
+    transform: translateY(-2px);
+}
+
+.next-step-btn {
+    background-color: #ff4655;
+    margin-left: 10px;
+}
+
+.next-step-btn:hover:not(:disabled) {
+    background-color: #ff6b77;
 }
 
 .next-step-btn:disabled {
     background-color: #1f2731;
     cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .agent-selection-grid {
@@ -898,6 +928,10 @@ body {
     width: 32px;
     height: 32px;
     margin-bottom: 4px;
+    background-color: #1f2731;
+    border-radius: 4px;
+    padding: 2px;
+    border: 1px solid #2a3441;
 }
 
 .skill-button span {

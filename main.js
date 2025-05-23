@@ -1,6 +1,11 @@
 // ESモジュールのインポート
-const { app, BrowserWindow } = require('electron');
-const path = require('path');
+import { app, BrowserWindow } from 'electron';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// __dirnameの代替（ESM用）
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -8,8 +13,10 @@ function createWindow() {
         height: 800,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false,
-            webSecurity: false
+            contextIsolation: true,
+            webSecurity: true,
+            allowRunningInsecureContent: false,
+            preload: path.join(__dirname, 'preload.cjs')
         }
     });
 
@@ -23,10 +30,12 @@ function createWindow() {
         `);
     });
 
-    win.loadFile('index.html');
+    win.loadFile(path.join(__dirname, 'index.html'));
 
     // 開発者ツールを開く
-    win.webContents.openDevTools();
+    if (process.env.NODE_ENV === 'development') {
+        win.webContents.openDevTools();
+    }
 }
 
 app.whenReady().then(() => {

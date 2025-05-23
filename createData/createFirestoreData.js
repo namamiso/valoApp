@@ -252,39 +252,57 @@ const positions = [
   }
 ];
 
+// 既存のデータをクリアする関数
+async function clearExistingData() {
+  try {
+    // カテゴリマッピングのクリア
+    const categorySnapshot = await getDocs(collection(db, "skillCategories"));
+    for (const doc of categorySnapshot.docs) {
+      await deleteDoc(doc.ref);
+    }
+    console.log("カテゴリマッピングをクリアしました");
+
+    // 定点データのクリア
+    const positionSnapshot = await getDocs(collection(db, "positions"));
+    for (const doc of positionSnapshot.docs) {
+      await deleteDoc(doc.ref);
+    }
+    console.log("定点データをクリアしました");
+  } catch (error) {
+    console.error("データのクリア中にエラーが発生しました:", error);
+    throw error;
+  }
+}
+
 // データをFirestoreに追加する関数
 async function addDataToFirestore() {
   try {
-    // 既存のデータをすべて削除
-    const existingCategories = await getDocs(collection(db, "skillCategories"));
-    for (const doc of existingCategories.docs) {
-      await deleteDoc(doc.ref);
-    }
-    console.log("既存のカテゴリデータを削除しました");
+    // 既存のデータをクリア
+    await clearExistingData();
 
     // カテゴリマッピングの追加
     for (const [agent, skills] of Object.entries(categoryMapping)) {
       for (const [skill, sides] of Object.entries(skills)) {
-        const docRef = await addDoc(collection(db, "skillCategories"), {
+        await addDoc(collection(db, "skillCategories"), {
           agent,
           skill,
-          ...sides
+          attack: sides.attack,
+          defense: sides.defense
         });
-        console.log("カテゴリマッピング追加成功:", docRef.id);
       }
     }
+    console.log("カテゴリマッピングを追加しました");
 
     // 定点データの追加
     for (const position of positions) {
-      const docRef = await addDoc(collection(db, "positions"), position);
-      console.log("定点データ追加成功:", docRef.id);
+      await addDoc(collection(db, "positions"), position);
     }
+    console.log("定点データを追加しました");
 
-    console.log("すべてのデータの追加が完了しました");
   } catch (error) {
     console.error("データの追加中にエラーが発生しました:", error);
   }
 }
 
-// 関数を実行
+// データの追加を実行
 addDataToFirestore();
