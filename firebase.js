@@ -25,7 +25,7 @@ async function initializeCategoryMapping() {
     try {
         // 既存のデータをクリア
         categoryMapping = {};
-        
+
         const querySnapshot = await getDocs(collection(db, "skillCategories"));
         querySnapshot.forEach((doc) => {
             const data = doc.data();
@@ -60,17 +60,17 @@ async function fetchPoints(map, agent, side) {
             where("agent", "==", agent),
             where("side", "==", side)
         );
-        
+
         const querySnapshot = await getDocs(q);
         const points = [];
-        
+
         querySnapshot.forEach((doc) => {
             points.push({
                 id: doc.id,
                 ...doc.data()
             });
         });
-        
+
         return points;
     } catch (error) {
         console.error("定点の取得に失敗しました:", error);
@@ -101,7 +101,7 @@ async function getCategoryMapping(agent, skill, side) {
             where("agent", "==", agent),
             where("skill", "==", skill)
         );
-        
+
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
             const doc = querySnapshot.docs[0];

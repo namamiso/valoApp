@@ -402,11 +402,11 @@ function displaySkills(agent) {
 
     // カテゴリマッピングからスキルを取得
     const skills = getAgentSkills(agent);
-    
+
     // スキルボタンのグリッドを作成
     const skillsGrid = document.createElement('div');
     skillsGrid.className = 'skills-grid';
-    
+
     skills.forEach(skill => {
         const skillButton = document.createElement('button');
         skillButton.className = 'skill-button';
@@ -414,7 +414,13 @@ function displaySkills(agent) {
 
         // スキルアイコンの画像を設定
         const skillIcon = document.createElement('img');
-        const imagePath = `assets/skills/${skill}.webp`;
+        // スキル名を適切な形式に変換（先頭と区切りを大文字に、区切りに_を追加）
+        const formattedSkill = skill
+            .split(/\s+|\//)
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join('_')
+            .replace(/\//g, '');
+        const imagePath = `assets/skills/${formattedSkill}.webp`;
         console.log('Loading skill image:', imagePath); // デバッグ用ログ
         skillIcon.src = imagePath;
         skillIcon.alt = skill;
