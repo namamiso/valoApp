@@ -774,7 +774,7 @@ function goToNextStep() {
                 updateSkillSelection();
                 break;
             case 4:
-                // 攻守選択の初期化
+                setupSideSelection();
                 break;
             case 5:
                 updateCategorySelection();
@@ -1025,3 +1025,16 @@ function resetAddPointModal() {
 
 // 初期化時に定点追加モーダルを設定
 initializeAddPointModal();
+
+// 攻守選択の設定
+function setupSideSelection() {
+    const sideButtons = document.querySelectorAll('#step4 .side-btn');
+    sideButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            sideButtons.forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
+            selectedSide = button.dataset.side;
+            document.querySelector('#step4 .next-step-btn').disabled = false;
+        });
+    });
+}
