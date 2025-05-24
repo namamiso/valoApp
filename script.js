@@ -9,6 +9,7 @@ let currentImageIndex = 0;
 let currentPoint = null;
 let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
 let isAddingPoint = false;
+let selectedPosition = { x: 0, y: 0 };
 
 // 定点追加のステップ管理
 let currentStep = 1;
@@ -16,11 +17,10 @@ let selectedMap = null;
 let selectedAgent = null;
 let selectedSkill = null;
 let selectedSide = null;
-let selectedPosition = { x: 0, y: 0 };
 let selectedCategory = null;
 let selectedImages = [];
-let newPointDescription = '';
-let newPointThrowType = '';
+let selectedThrowType = '';
+let selectedDescription = '';
 
 // DOM要素の取得
 const mapButtons = document.querySelector('.map-buttons');
@@ -252,9 +252,9 @@ function setupEventListeners() {
             if (modal) {
                 modal.style.display = 'none';
                 if (modal.id === 'addPointModal') {
-                    isAddingPoint = false;
-                    positionMarker.style.display = 'none';
-                }
+            isAddingPoint = false;
+            positionMarker.style.display = 'none';
+        }
             }
         });
     });
@@ -308,29 +308,8 @@ function setupEventListeners() {
 
     // 新規定点追加ボタンのイベントリスナー
     addPointBtn.addEventListener('click', () => {
-        currentStep = 1;
-        selectedMap = null;
-        selectedAgent = null;
-        selectedSkill = null;
-        selectedSide = null;
-        selectedPosition = { x: 50, y: 50 };
-        updateStepDisplay();
+        resetAddPointModal();
         addPointModal.style.display = 'block';
-        positionMarker.style.display = 'block';
-        positionMarker.style.left = '50%';
-        positionMarker.style.top = '50%';
-        positionX.textContent = '50.0';
-        positionY.textContent = '50.0';
-
-        // すべてのマップボタンのアクティブ状態を解除
-        document.querySelectorAll('#step1 .map-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        // 次へボタンを無効化
-        document.querySelector('#step1 .next-step-btn').disabled = true;
-
-        // エージェント選択画面のボタンを生成
-        generateAddPointAgentButtons();
     });
 
     // ステップナビゲーション
@@ -683,16 +662,10 @@ initialize();
 
 // ステップの表示を更新
 function updateStepDisplay() {
-    // すべてのステップを非表示
     document.querySelectorAll('.add-point-step').forEach(step => {
         step.style.display = 'none';
     });
-
-    // 現在のステップを表示
-    const currentStepElement = document.getElementById(`step${currentStep}`);
-    if (currentStepElement) {
-        currentStepElement.style.display = 'block';
-    }
+    document.getElementById(`step${currentStep}`).style.display = 'block';
 }
 
 // スキル選択画面の更新
@@ -705,14 +678,9 @@ function updateSkillSelection() {
         return;
     }
 
-    // カテゴリマッピングからスキルを取得
     const categoryMapping = getCategoryMapping();
-    console.log('カテゴリマッピング:', categoryMapping);
-    console.log('選択されたエージェント:', selectedAgent);
-    
     const skills = categoryMapping[selectedAgent] ? Object.keys(categoryMapping[selectedAgent]) : [];
-    console.log('取得されたスキル:', skills);
-    
+
     if (!skills || skills.length === 0) {
         console.log('スキルが見つかりません');
         return;
@@ -726,26 +694,18 @@ function updateSkillSelection() {
         skillButton.className = 'skill-button';
         skillButton.dataset.skill = skill;
 
-        // スキルアイコンの画像を設定
         const skillIcon = document.createElement('img');
-        // スキル名を適切な形式に変換
         const formattedSkill = skill
-            .replace(/\s+/g, '_')  // スペースをアンダースコアに
-            .replace(/\//g, '_')   // スラッシュをアンダースコアに
-            .replace(/-/g, '_')    // ハイフンをアンダースコアに
-            .toLowerCase();        // 小文字に変換
+            .replace(/\s+/g, '_')
+            .replace(/\//g, '_')
+            .replace(/-/g, '_')
+            .toLowerCase();
 
-        const imagePath = `assets/skills/${formattedSkill}.webp`;
-        console.log('スキルアイコンのパス:', imagePath);
-        
-        skillIcon.src = resolvePath(imagePath);
+        skillIcon.src = resolvePath(`assets/skills/${formattedSkill}.webp`);
         skillIcon.alt = skill;
         skillIcon.onerror = function() {
             console.warn(`スキルアイコンの読み込みに失敗: ${skillIcon.src}`);
             this.style.display = 'none';
-        };
-        skillIcon.onload = function() {
-            console.log(`スキルアイコンの読み込み成功: ${skillIcon.src}`);
         };
 
         const skillName = document.createElement('span');
@@ -769,334 +729,299 @@ function updateSkillSelection() {
     skillSelection.appendChild(skillsGrid);
 }
 
+// マップ表示の更新（定点追加用）
+function updateAddPointMapDisplay() {
+    const prefix = selectedSide === 'attack' ? 'atk_' : 'def_';
+    const mapPath = resolvePath(`assets/maps/${prefix}${selectedMap.toLowerCase()}.svg`);
+    const mapImage = document.querySelector('#step6 .map-display img');
+    if (mapImage) {
+        mapImage.src = mapPath;
+    }
+}
+
+// マップクリック時の処理
+function handleMapClick(e) {
+    const mapDisplay = document.querySelector('#step6 .map-display');
+    const rect = mapDisplay.getBoundingClientRect();
+    
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    const positionMarker = document.getElementById('positionMarker');
+    positionMarker.style.left = `${x}%`;
+    positionMarker.style.top = `${y}%`;
+    positionMarker.style.display = 'block';
+
+    document.getElementById('positionX').textContent = x.toFixed(1);
+    document.getElementById('positionY').textContent = y.toFixed(1);
+
+    selectedPosition = { x, y };
+    document.querySelector('#step6 .next-step-btn').disabled = false;
+}
+
+// 次のステップに進む
+function goToNextStep() {
+    if (currentStep < 9) {
+        currentStep++;
+        updateStepDisplay();
+
+        // 各ステップの初期化処理
+        switch (currentStep) {
+            case 2:
+                generateAddPointAgentButtons();
+                break;
+            case 3:
+                updateSkillSelection();
+                break;
+            case 4:
+                // 攻守選択の初期化
+                break;
+            case 5:
+                updateCategorySelection();
+                break;
+            case 6:
+                updateAddPointMapDisplay();
+                setupMapClickHandler();
+                break;
+            case 7:
+                setupImageUpload();
+                break;
+            case 8:
+                setupThrowTypeSelection();
+                break;
+            case 9:
+                setupDescriptionInput();
+                break;
+        }
+    } else {
+        // 最終ステップで追加ボタンが押された場合
+        addPointToFirestore();
+    }
+}
+
+// 前のステップに戻る
+function goToPrevStep() {
+    if (currentStep > 1) {
+        // 現在のステップのクリーンアップ
+        switch (currentStep) {
+            case 6:
+                cleanupMapClickHandler();
+                break;
+            case 7:
+                cleanupImageUpload();
+                break;
+        }
+
+        currentStep--;
+        updateStepDisplay();
+    }
+}
+
 // カテゴリ選択画面の更新
 function updateCategorySelection() {
-    console.log('カテゴリ選択画面の更新開始');
-    console.log('選択されたエージェント:', selectedAgent);
-    console.log('選択されたスキル:', selectedSkill);
-    console.log('選択されたサイド:', selectedSide);
-
-    const categorySelection = document.querySelector('#step4 .category-selection');
-    categorySelection.innerHTML = '';
+    const categoryButtons = document.querySelector('#step5 .category-buttons');
+    categoryButtons.innerHTML = '';
 
     if (!selectedAgent || !selectedSkill || !selectedSide) {
         console.log('必要な情報が不足しています');
         return;
     }
 
-    // カテゴリマッピングからカテゴリを取得
     const categoryMapping = getCategoryMapping();
     const categories = categoryMapping[selectedAgent]?.[selectedSkill]?.[selectedSide] || [];
-    console.log('取得されたカテゴリ:', categories);
 
     if (categories.length === 0) {
         console.log('カテゴリが見つかりません');
         return;
     }
 
-    const categoriesGrid = document.createElement('div');
-    categoriesGrid.className = 'categories-grid';
-
     categories.forEach(category => {
-        const categoryButton = document.createElement('button');
-        categoryButton.className = 'category-button';
-        categoryButton.textContent = category;
+        const button = document.createElement('button');
+        button.className = 'category-btn';
+        button.textContent = category;
+        button.dataset.category = category;
 
-        categoryButton.addEventListener('click', () => {
-            document.querySelectorAll('#step4 .category-button').forEach(btn => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('#step5 .category-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
-            categoryButton.classList.add('selected');
+            button.classList.add('selected');
             selectedCategory = category;
-            document.querySelector('#step4 .next-step-btn').disabled = false;
+            document.querySelector('#step5 .next-step-btn').disabled = false;
         });
 
-        categoriesGrid.appendChild(categoryButton);
+        categoryButtons.appendChild(button);
     });
-
-    categorySelection.appendChild(categoriesGrid);
 }
 
-// マップクリック時の処理
-function handleMapClick(e) {
-    console.log('マップクリックイベント発生');
-    console.log('現在のステップ:', currentStep);
-    console.log('選択されたスキル:', selectedSkill);
-
-    if (currentStep !== 4 || !selectedSkill) {
-        console.log('スキルが選択されていないか、ステップが4ではありません');
-        return;
-    }
-
-    const mapDisplay = document.querySelector('#step4 .map-display');
-    const rect = mapDisplay.getBoundingClientRect();
-    
-    // クリック位置をパーセンテージに変換
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    console.log('クリック座標:', { x, y });
-
-    // 位置マーカーを更新
-    const positionMarker = document.getElementById('positionMarker');
-    console.log('位置マーカー要素:', positionMarker);
-
-    // スキルアイコンの作成
-    const skillIcon = document.createElement('img');
-    const formattedSkill = selectedSkill
-        .replace(/\s+/g, '_')
-        .replace(/\//g, '_')
-        .replace(/-/g, '_')
-        .toLowerCase();
-    
-    const imagePath = `assets/skills/${formattedSkill}.webp`;
-    console.log('スキルアイコンのパス:', imagePath);
-    
-    skillIcon.src = resolvePath(imagePath);
-    skillIcon.alt = selectedSkill;
-    skillIcon.className = 'point-skill-icon';
-    skillIcon.onerror = function() {
-        console.warn(`スキルアイコンの読み込みに失敗: ${skillIcon.src}`);
-        this.style.display = 'none';
-    };
-    skillIcon.onload = function() {
-        console.log(`スキルアイコンの読み込み成功: ${skillIcon.src}`);
-    };
-
-    // 位置マーカーの内容をクリアして新しいスキルアイコンを追加
-    positionMarker.innerHTML = '';
-    positionMarker.appendChild(skillIcon);
-    positionMarker.style.left = `${x}%`;
-    positionMarker.style.top = `${y}%`;
-    positionMarker.style.display = 'block';
-    console.log('位置マーカーのスタイル:', {
-        left: positionMarker.style.left,
-        top: positionMarker.style.top,
-        display: positionMarker.style.display
-    });
-
-    // 座標を表示
-    document.getElementById('positionX').textContent = x.toFixed(1);
-    document.getElementById('positionY').textContent = y.toFixed(1);
-    console.log('表示座標:', { x: x.toFixed(1), y: y.toFixed(1) });
-
-    // 選択された位置を保存
-    selectedPosition = { x, y };
-    console.log('保存された位置:', selectedPosition);
-
-    // 次へボタンを有効化
-    const nextButton = document.querySelector('#step4 .next-step-btn');
-    nextButton.disabled = false;
-    console.log('次へボタンの状態:', { disabled: nextButton.disabled });
-}
-
-// マップ表示の更新（定点追加用）
-function updateAddPointMapDisplay() {
-    console.log('マップ表示の更新開始');
-    console.log('選択されたマップ:', selectedMap);
-    console.log('選択されたサイド:', selectedSide);
-
-    const prefix = selectedSide === 'attack' ? 'atk_' : 'def_';
-    const mapPath = resolvePath(`assets/maps/${prefix}${selectedMap.toLowerCase()}.svg`);
-    console.log('マップ画像のパス:', mapPath);
-
-    const mapImage = document.querySelector('#step4 .map-display img');
-    console.log('マップ画像要素:', mapImage);
-
-    if (mapImage) {
-        mapImage.src = mapPath;
-        mapImage.onload = function() {
-            console.log('マップ画像の読み込み成功');
-        };
-        mapImage.onerror = function() {
-            console.error('マップ画像の読み込みに失敗:', mapPath);
-        };
-    } else {
-        console.error('マップ画像要素が見つかりません');
+// マップクリックハンドラーの設定
+function setupMapClickHandler() {
+    const mapDisplay = document.querySelector('#step6 .map-display');
+    if (mapDisplay) {
+        mapDisplay.addEventListener('click', handleMapClick);
     }
 }
 
-// 次のステップに進む
-function goToNextStep() {
-    console.log('次のステップに進む');
-    console.log('現在のステップ:', currentStep);
-
-    if (currentStep < 7) { // ステップ数を7に更新
-        currentStep++;
-        updateStepDisplay();
-        
-        // ステップ2（エージェント選択）からステップ3（スキル選択）に進む時
-        if (currentStep === 3) {
-            console.log('ステップ3（スキル選択）に進みます');
-            updateSkillSelection();
-        }
-        // ステップ3（スキル選択）からステップ4（カテゴリ選択）に進む時
-        else if (currentStep === 4) {
-            console.log('ステップ4（カテゴリ選択）に進みます');
-            updateCategorySelection();
-        }
-        // ステップ4（カテゴリ選択）からステップ5（位置選択）に進む時
-        else if (currentStep === 5) {
-            console.log('ステップ5（位置選択）に進みます');
-            updateAddPointMapDisplay();
-            // マップクリックイベントを設定
-            const mapDisplay = document.querySelector('#step5 .map-display');
-            if (mapDisplay) {
-                console.log('マップクリックイベントを設定します');
-                mapDisplay.addEventListener('click', handleMapClick);
-            } else {
-                console.error('マップ表示要素が見つかりません');
-            }
-        }
-        // ステップ5（位置選択）からステップ6（画像追加）に進む時
-        else if (currentStep === 6) {
-            console.log('ステップ6（画像追加）に進みます');
-            // マップクリックイベントを削除
-            const mapDisplay = document.querySelector('#step5 .map-display');
-            if (mapDisplay) {
-                mapDisplay.removeEventListener('click', handleMapClick);
-            }
-        }
+// マップクリックハンドラーのクリーンアップ
+function cleanupMapClickHandler() {
+    const mapDisplay = document.querySelector('#step6 .map-display');
+    if (mapDisplay) {
+        mapDisplay.removeEventListener('click', handleMapClick);
     }
 }
 
-// 前のステップに戻る
-function goToPrevStep() {
-    console.log('前のステップに戻る');
-    console.log('現在のステップ:', currentStep);
+// 画像アップロードの設定
+function setupImageUpload() {
+    const imageInput = document.getElementById('pointImages');
+    const imagePreview = document.getElementById('imagePreview');
 
-    if (currentStep > 1) {
-        // ステップ4から戻る時、マップクリックイベントを削除
-        if (currentStep === 4) {
-            console.log('ステップ4から戻ります');
-            const mapDisplay = document.querySelector('#step4 .map-display');
-            if (mapDisplay) {
-                console.log('マップクリックイベントを削除します');
-                mapDisplay.removeEventListener('click', handleMapClick);
-            }
+    imageInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length < 3 || files.length > 5) {
+            alert('画像は3〜5枚選択してください');
+            imageInput.value = '';
+            imagePreview.innerHTML = '';
+            selectedImages = [];
+            document.querySelector('#step7 .next-step-btn').disabled = true;
+            return;
         }
-        
-        currentStep--;
-        updateStepDisplay();
-    }
-}
 
-// 画像追加の処理
-function handleImageUpload(event) {
-    const files = event.target.files;
-    console.log('アップロードされたファイル数:', files.length);
+        selectedImages = [];
+        imagePreview.innerHTML = '';
 
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (file.type.startsWith('image/')) {
+        files.forEach(file => {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = (e) => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                imagePreview.appendChild(img);
                 selectedImages.push(e.target.result);
-                updateImagePreview();
             };
             reader.readAsDataURL(file);
-        }
-    }
-}
+        });
 
-// 画像プレビューの更新
-function updateImagePreview() {
-    const previewContainer = document.querySelector('#step6 .image-preview-container');
-    previewContainer.innerHTML = '';
-
-    selectedImages.forEach((image, index) => {
-        const preview = document.createElement('div');
-        preview.className = 'image-preview';
-        
-        const img = document.createElement('img');
-        img.src = image;
-        
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'remove-image';
-        removeBtn.textContent = '×';
-        removeBtn.onclick = () => {
-            selectedImages.splice(index, 1);
-            updateImagePreview();
-        };
-
-        preview.appendChild(img);
-        preview.appendChild(removeBtn);
-        previewContainer.appendChild(preview);
+        document.querySelector('#step7 .next-step-btn').disabled = false;
     });
 }
 
-// 説明文入力の処理
-function handleDescriptionInput(event) {
-    newPointDescription = event.target.value;
-    console.log('説明文が更新されました:', newPointDescription);
+// 画像アップロードのクリーンアップ
+function cleanupImageUpload() {
+    const imageInput = document.getElementById('pointImages');
+    imageInput.value = '';
+    document.getElementById('imagePreview').innerHTML = '';
+    selectedImages = [];
 }
 
-// 投げ方入力の処理
-function handleThrowTypeInput(event) {
-    newPointThrowType = event.target.value;
-    console.log('投げ方が更新されました:', newPointThrowType);
-}
-
-// 定点の追加処理
-async function addNewPoint() {
-    console.log('定点の追加処理を開始');
-    console.log('選択された情報:', {
-        map: selectedMap,
-        agent: selectedAgent,
-        skill: selectedSkill,
-        side: selectedSide,
-        category: selectedCategory,
-        position: selectedPosition,
-        images: selectedImages,
-        description: newPointDescription,
-        throwType: newPointThrowType
+// 投げ方選択の設定
+function setupThrowTypeSelection() {
+    const throwTypeSelect = document.getElementById('throwType');
+    throwTypeSelect.addEventListener('change', () => {
+        selectedThrowType = throwTypeSelect.value;
+        document.querySelector('#step8 .next-step-btn').disabled = !selectedThrowType;
     });
+}
 
+// 説明入力の設定
+function setupDescriptionInput() {
+    const descriptionInput = document.getElementById('pointDescription');
+    descriptionInput.addEventListener('input', () => {
+        selectedDescription = descriptionInput.value;
+        document.querySelector('#step9 .next-step-btn').disabled = !selectedDescription;
+    });
+}
+
+// Firestoreに定点を追加
+async function addPointToFirestore() {
     try {
-        // Firestoreにデータを追加
-        const pointData = {
-            map: selectedMap,
+        const point = {
+            map: selectedMap.toLowerCase(),
             agent: selectedAgent,
             skill: selectedSkill,
             side: selectedSide,
             category: [selectedCategory],
             position: selectedPosition,
             images: selectedImages,
-            description: newPointDescription,
-            throwType: newPointThrowType,
-            timestamp: new Date()
+            throwType: selectedThrowType,
+            description: selectedDescription,
+            timestamp: new Date().toISOString()
         };
 
-        // TODO: Firestoreへのデータ追加処理を実装
-        // await addPointToFirestore(pointData);
-
-        console.log('定点の追加が完了しました');
-        
-        // モーダルを閉じる
-        const addPointModal = document.getElementById('addPointModal');
-        addPointModal.style.display = 'none';
-        
-        // 選択状態をリセット
-        resetPointSelection();
-        
-        // 成功メッセージを表示
+        await addPoint(point);
         alert('定点が追加されました');
+        document.getElementById('addPointModal').style.display = 'none';
+        resetAddPointModal();
+        loadPoints(); // 定点一覧を更新
     } catch (error) {
         console.error('定点の追加に失敗しました:', error);
         alert('定点の追加に失敗しました');
     }
 }
 
-// 選択状態のリセット
-function resetPointSelection() {
+// 定点追加モーダルの初期化
+function initializeAddPointModal() {
+    const addPointBtn = document.getElementById('addPointBtn');
+    const addPointModal = document.getElementById('addPointModal');
+    const closeBtn = addPointModal.querySelector('.close');
+
+    addPointBtn.addEventListener('click', () => {
+        resetAddPointModal();
+        addPointModal.style.display = 'block';
+    });
+
+    closeBtn.addEventListener('click', () => {
+        addPointModal.style.display = 'none';
+        resetAddPointModal();
+    });
+}
+
+// 定点追加モーダルのリセット
+function resetAddPointModal() {
     currentStep = 1;
     selectedMap = null;
     selectedAgent = null;
     selectedSkill = null;
     selectedSide = null;
-    selectedPosition = { x: 0, y: 0 };
     selectedCategory = null;
+    selectedPosition = { x: 50, y: 50 };
     selectedImages = [];
-    newPointDescription = '';
-    newPointThrowType = '';
-    updateStepDisplay();
+    selectedThrowType = '';
+    selectedDescription = '';
+
+    // すべてのステップを非表示
+    document.querySelectorAll('.add-point-step').forEach(step => {
+        step.style.display = 'none';
+    });
+
+    // ステップ1を表示
+    document.getElementById('step1').style.display = 'block';
+
+    // すべてのボタンのアクティブ状態を解除
+    document.querySelectorAll('.map-btn, .agent-btn, .skill-button, .side-btn, .category-btn').forEach(btn => {
+        btn.classList.remove('active', 'selected');
+    });
+
+    // すべての次へボタンを無効化
+    document.querySelectorAll('.next-step-btn').forEach(btn => {
+        btn.disabled = true;
+    });
+
+    // 位置マーカーをリセット
+    const positionMarker = document.getElementById('positionMarker');
+    positionMarker.style.display = 'none';
+    positionMarker.style.left = '50%';
+    positionMarker.style.top = '50%';
+
+    // 座標表示をリセット
+    document.getElementById('positionX').textContent = '50.0';
+    document.getElementById('positionY').textContent = '50.0';
+
+    // 画像プレビューをクリア
+    document.getElementById('imagePreview').innerHTML = '';
+
+    // フォームをリセット
+    document.getElementById('throwType').value = '';
+    document.getElementById('pointDescription').value = '';
 }
+
+// 初期化時に定点追加モーダルを設定
+initializeAddPointModal();

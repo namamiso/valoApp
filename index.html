@@ -94,12 +94,12 @@
         </div>
     </div>
 
-    <!-- 新規定点追加モーダル -->
+    <!-- 定点追加モーダル -->
     <div id="addPointModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>新規定点の追加</h2>
-
+            <h2>定点追加</h2>
+            
             <!-- ステップ1: マップ選択 -->
             <div id="step1" class="add-point-step">
                 <h3>マップを選択</h3>
@@ -134,9 +134,7 @@
             <div id="step3" class="add-point-step" style="display: none;">
                 <h3>スキルを選択</h3>
                 <div class="skill-selection">
-                    <select id="pointSkill" name="skill" required>
-                        <!-- スキル選択肢はJavaScriptで動的に生成 -->
-                    </select>
+                    <!-- スキルボタンはJavaScriptで動的に生成 -->
                 </div>
                 <div class="step-navigation">
                     <button class="prev-step-btn">戻る</button>
@@ -144,9 +142,9 @@
                 </div>
             </div>
 
-            <!-- ステップ4: サイド選択 -->
+            <!-- ステップ4: 攻守選択 -->
             <div id="step4" class="add-point-step" style="display: none;">
-                <h3>サイドを選択</h3>
+                <h3>攻守を選択</h3>
                 <div class="side-selection">
                     <button class="side-btn" data-side="attack">攻め</button>
                     <button class="side-btn" data-side="defense">守り</button>
@@ -157,53 +155,78 @@
                 </div>
             </div>
 
-            <!-- ステップ5: 定点情報入力 -->
+            <!-- ステップ5: カテゴリ選択 -->
             <div id="step5" class="add-point-step" style="display: none;">
-                <h3>定点情報を入力</h3>
-                <form id="addPointForm" class="add-point-form">
-                    <div class="form-group">
-                        <label for="pointCategory">カテゴリ</label>
-                        <select id="pointCategory" name="category" required>
-                            <!-- カテゴリ選択肢はJavaScriptで動的に生成 -->
-                        </select>
+                <h3>カテゴリを選択</h3>
+                <div class="category-buttons">
+                    <!-- カテゴリボタンはJavaScriptで動的に生成 -->
+                </div>
+                <div class="step-navigation">
+                    <button class="prev-step-btn">戻る</button>
+                    <button class="next-step-btn" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- ステップ6: 位置選択 -->
+            <div id="step6" class="add-point-step" style="display: none;">
+                <h3>位置を選択</h3>
+                <div class="map-display">
+                    <div class="map-container">
+                        <img src="" alt="マップ">
+                        <div id="positionMarker" class="position-marker" style="display: none;"></div>
                     </div>
-                    <div class="form-group">
-                        <label for="pointDescription">説明</label>
-                        <textarea id="pointDescription" name="description" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="pointThrowType">投げ方</label>
-                        <select id="pointThrowType" name="throwType" required>
-                            <option value="その場投げ">その場投げ</option>
-                            <option value="ジャンプ投げ">ジャンプ投げ</option>
-                            <option value="走りジャンプ投げ">走りジャンプ投げ</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>位置</label>
-                        <div class="position-info">
-                            <p>X: <span id="positionX">0</span>%</p>
-                            <p>Y: <span id="positionY">0</span>%</p>
-                        </div>
-                        <div class="position-controls">
-                            <button type="button" class="position-btn" data-direction="up">↑</button>
-                            <button type="button" class="position-btn" data-direction="down">↓</button>
-                            <button type="button" class="position-btn" data-direction="left">←</button>
-                            <button type="button" class="position-btn" data-direction="right">→</button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>画像（最大5枚）</label>
-                        <div class="image-upload">
-                            <input type="file" id="pointImages" name="images" accept="image/*" multiple required>
-                            <div id="imagePreview" class="image-preview"></div>
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="submit-btn">追加</button>
-                        <button type="button" class="cancel-btn">キャンセル</button>
-                    </div>
-                </form>
+                </div>
+                <div class="position-info">
+                    <span>X: <span id="positionX">50.0</span>%</span>
+                    <span>Y: <span id="positionY">50.0</span>%</span>
+                </div>
+                <div class="step-navigation">
+                    <button class="prev-step-btn">戻る</button>
+                    <button class="next-step-btn" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- ステップ7: 画像追加 -->
+            <div id="step7" class="add-point-step" style="display: none;">
+                <h3>画像を追加（3〜5枚）</h3>
+                <div class="image-upload">
+                    <input type="file" id="pointImages" multiple accept="image/*">
+                    <div id="imagePreview" class="image-preview"></div>
+                </div>
+                <div class="step-navigation">
+                    <button class="prev-step-btn">戻る</button>
+                    <button class="next-step-btn" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- ステップ8: 投げ方選択 -->
+            <div id="step8" class="add-point-step" style="display: none;">
+                <h3>投げ方を選択</h3>
+                <div class="form-group">
+                    <select id="throwType">
+                        <option value="">選択してください</option>
+                        <option value="その場投げ">その場投げ</option>
+                        <option value="ジャンプ投げ">ジャンプ投げ</option>
+                        <option value="ラン投げ">ラン投げ</option>
+                        <option value="その他">その他</option>
+                    </select>
+                </div>
+                <div class="step-navigation">
+                    <button class="prev-step-btn">戻る</button>
+                    <button class="next-step-btn" disabled>次へ</button>
+                </div>
+            </div>
+
+            <!-- ステップ9: 説明入力 -->
+            <div id="step9" class="add-point-step" style="display: none;">
+                <h3>説明を入力</h3>
+                <div class="form-group">
+                    <textarea id="pointDescription" placeholder="定点の説明を入力してください"></textarea>
+                </div>
+                <div class="step-navigation">
+                    <button class="prev-step-btn">戻る</button>
+                    <button class="next-step-btn" disabled>追加</button>
+                </div>
             </div>
         </div>
     </div>
