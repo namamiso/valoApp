@@ -364,13 +364,13 @@ function setupEventListeners() {
         e.preventDefault();
         const delta = e.deltaY;
         const zoomFactor = 0.1;
-        
+
         if (delta < 0) {
             scale = Math.min(scale + zoomFactor, 3);
         } else {
             scale = Math.max(scale - zoomFactor, 0.5);
         }
-        
+
         mapContainer.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
     });
 
@@ -446,8 +446,14 @@ function displayPoints(points) {
         }
 
         marker.appendChild(skillIcon);
-        marker.addEventListener('click', () => showPointDetails(point));
-        mapContainer.appendChild(marker);
+
+        // クリックイベントの追加
+        marker.addEventListener('click', () => {
+            showPointDetails(point);
+        });
+
+        // マップコンテナに追加
+        document.querySelector('.map-container').appendChild(marker);
     });
 }
 
@@ -550,8 +556,19 @@ function displaySkills(agent) {
                 btn.classList.remove('selected');
             });
             skillButton.classList.add('selected');
-            selectedSkill = skill;
-            nextStepBtn.disabled = false;
+            
+            // 特定スキルの場合はカテゴリ選択をスキップ
+            if (isSpecialSkill(agent, skill)) {
+                const points = currentPoints.filter(point =>
+                    point.agent === agent &&
+                    point.skill === skill &&
+                    point.side === currentSide
+                );
+                displayPoints(points);
+            } else {
+                // カテゴリを表示
+                displayCategories(agent, skill, currentSide);
+            }
         });
 
         skillsGrid.appendChild(skillButton);
@@ -743,7 +760,7 @@ function updateAddPointMapDisplay() {
 function handleMapClick(e) {
     const mapDisplay = document.querySelector('#step6 .map-display');
     const rect = mapDisplay.getBoundingClientRect();
-    
+
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
