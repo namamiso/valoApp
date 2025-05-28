@@ -489,16 +489,9 @@ function updateSlider(point) {
 // 特定スキルの判定
 function isSpecialSkill(agent, skill) {
     const specialSkills = {
-        'cypher': ['Spy Cam'],
-        'viper': ['Viper\'s Pit'],
-        'astra': ['Nova Pulse', 'Nebula', 'Astral Form'],
-        'kayo': ['ZERO/point'],
-        'neon': ['Fast Lane', 'Overdrive'],
-        'fade': ['Haunt', 'Seize'],
-        'harbor': ['Cove', 'High Tide'],
-        'gekko': ['Wingman', 'Mosh Pit'],
+        'cypher': ['Spy Cam', 'Trapwire', 'Cyber Cage'],
+        'viper': ['Vipers Pit'],
         'deadlock': ['Sonic Sensor', 'Barrier Mesh'],
-        'clove': ['Meddle', 'Ruse']
     };
     return specialSkills[agent]?.includes(skill) || false;
 }

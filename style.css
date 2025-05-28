@@ -255,6 +255,8 @@ body {
     width: 80%;
     max-width: 800px;
     border-radius: 8px;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .close {
@@ -588,6 +590,7 @@ body {
     gap: 20px;
     color: #ece8e1;
     font-size: 14px;
+    margin: 5px 0;
 }
 
 .form-actions {
@@ -631,8 +634,8 @@ body {
 .step-navigation {
     display: flex;
     justify-content: flex-end;
-    margin-top: 20px;
-    padding: 0 20px 20px 0;
+    margin-top: 10px;
+    padding: 0 10px 10px 0;
 }
 
 .prev-step-btn,
@@ -942,4 +945,24 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
-} 
+}
+
+/* 定点追加モーダル内のマップ表示エリア */
+#addPointModal .map-display {
+    height: 50vh;
+    max-height: 500px;
+    margin: 10px 0;
+}
+
+#addPointModal .map-container {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#addPointModal .map-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
