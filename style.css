@@ -952,6 +952,8 @@ body {
     height: 50vh;
     max-height: 500px;
     margin: 10px 0;
+    cursor: grab;
+    overflow: hidden;
 }
 
 #addPointModal .map-container {
@@ -959,10 +961,18 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    transform-origin: center;
+    transition: transform 0.1s ease;
 }
 
 #addPointModal .map-container img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+#addPointModal .map-display:active {
+    cursor: grabbing;
 }

@@ -733,6 +733,80 @@ function updateAddPointMapDisplay() {
     if (mapImage) {
         mapImage.src = mapPath;
     }
+
+    // マップ表示エリアの要素を取得
+    const mapDisplay = document.querySelector('#step6 .map-display');
+    const mapContainer = document.querySelector('#step6 .map-container');
+
+    // ズームとドラッグ用の変数
+    let scale = 1;
+    let isDragging = false;
+    let startX, startY;
+    let translateX = 0;
+    let translateY = 0;
+
+    // マウスダウンイベント
+    mapDisplay.addEventListener('mousedown', (e) => {
+        if (e.button === 0) { // 左クリックの場合のみ
+            isDragging = true;
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+            mapDisplay.style.cursor = 'grabbing';
+        }
+    });
+
+    // マウス移動イベント
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            e.preventDefault();
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            mapContainer.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
+        }
+    });
+
+    // マウスアップイベント
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            mapDisplay.style.cursor = 'grab';
+        }
+    });
+
+    // ホイールイベント（ズーム）
+    mapDisplay.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY;
+        const zoomFactor = 0.1;
+
+        if (delta < 0) {
+            scale = Math.min(scale + zoomFactor, 3);
+        } else {
+            scale = Math.max(scale - zoomFactor, 0.5);
+        }
+
+        mapContainer.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
+    });
+
+    // マップクリック時の処理を修正
+    mapDisplay.addEventListener('click', (e) => {
+        if (!isDragging) { // ドラッグ中でない場合のみ位置を設定
+            const rect = mapDisplay.getBoundingClientRect();
+            const x = ((e.clientX - rect.left - translateX) / (rect.width * scale)) * 100;
+            const y = ((e.clientY - rect.top - translateY) / (rect.height * scale)) * 100;
+
+            const positionMarker = document.getElementById('positionMarker');
+            positionMarker.style.left = `${x}%`;
+            positionMarker.style.top = `${y}%`;
+            positionMarker.style.display = 'block';
+
+            document.getElementById('positionX').textContent = x.toFixed(1);
+            document.getElementById('positionY').textContent = y.toFixed(1);
+
+            selectedPosition = { x, y };
+            document.querySelector('#step6 .next-step-btn').disabled = false;
+        }
+    });
 }
 
 // マップクリック時の処理
