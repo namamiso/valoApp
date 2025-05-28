@@ -446,14 +446,12 @@ function displayPoints(points) {
         }
 
         marker.appendChild(skillIcon);
+        mapContainer.appendChild(marker);
 
-        // クリックイベントの追加
+        // クリックイベントの設定
         marker.addEventListener('click', () => {
             showPointDetails(point);
         });
-
-        // マップコンテナに追加
-        document.querySelector('.map-container').appendChild(marker);
     });
 }
 
@@ -508,47 +506,27 @@ function isSpecialSkill(agent, skill) {
 // スキルアイコンの表示
 function displaySkills(agent) {
     const skillsContainer = document.querySelector('.skill-buttons');
-    if (!skillsContainer) {
-        console.error('スキルコンテナが見つかりません');
-        return;
-    }
     skillsContainer.innerHTML = '';
 
-    // カテゴリマッピングからスキルを取得
     const skills = getAgentSkills(agent);
-
-    // スキルボタンのグリッドを作成
     const skillsGrid = document.createElement('div');
     skillsGrid.className = 'skills-grid';
 
     skills.forEach(skill => {
         const skillButton = document.createElement('button');
-        skillButton.className = 'skill-button';
+        skillButton.className = 'skill-btn';
         skillButton.dataset.skill = skill;
 
-        // スキルアイコンの画像を設定
+        // スキルアイコンの作成
         const skillIcon = document.createElement('img');
-        // スキル名を適切な形式に変換（先頭と区切りを大文字に、区切りに_を追加）
         const formattedSkill = skill
             .split(/\s+|\//)
             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
             .join('_')
             .replace(/\//g, '');
-        const imagePath = `assets/skills/${formattedSkill}.webp`;
-        console.log('Loading skill image:', imagePath); // デバッグ用ログ
-        skillIcon.src = imagePath;
+        skillIcon.src = resolvePath(`assets/skills/${formattedSkill}.webp`);
         skillIcon.alt = skill;
-        skillIcon.onerror = function() {
-            console.warn(`Failed to load image: ${imagePath}`); // デバッグ用ログ
-            // エラー時は空の画像を表示
-            this.style.display = 'none';
-        };
-
-        const skillName = document.createElement('span');
-        skillName.textContent = skill;
-
         skillButton.appendChild(skillIcon);
-        skillButton.appendChild(skillName);
 
         // スキル選択時のイベントリスナー
         skillButton.addEventListener('click', () => {
@@ -566,6 +544,14 @@ function displaySkills(agent) {
                 );
                 displayPoints(points);
             } else {
+                // スキルで絞り込んだ定点を表示
+                const filteredPoints = currentPoints.filter(point =>
+                    point.agent === agent &&
+                    point.skill === skill &&
+                    point.side === currentSide
+                );
+                displayPoints(filteredPoints);
+                
                 // カテゴリを表示
                 displayCategories(agent, skill, currentSide);
             }
