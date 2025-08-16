@@ -45,7 +45,22 @@
             <!-- マップ表示エリア -->
             <div class="map-display">
                 <div class="map-container">
-                    <img id="mapImage" src="" alt="マップ">
+                    <div class="map-root">
+                        <svg id="mapSvg"
+                             viewBox="0 0 1000 1000"
+                             preserveAspectRatio="xMidYMid meet"
+                             style="width: 100%; height: 100%; display: block;">
+                            <!-- 拡大縮小・パンの適用先 -->
+                            <g id="viewport">
+                                <!-- 背景マップ -->
+                                <image id="mapImageSvg" x="0" y="0" width="1000" height="1000" href="" />
+                                <!-- 定点レイヤ -->
+                                <g id="pointsLayer"></g>
+                                <!-- 将来用: クリックガイド等 -->
+                                <g id="interactionsLayer" pointer-events="none"></g>
+                            </g>
+                        </svg>
+                    </div>
                     <div id="positionMarker" class="position-marker" style="display: none;"></div>
                 </div>
             </div>
@@ -99,7 +114,7 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>定点追加</h2>
-            
+
             <!-- ステップ1: マップ選択 -->
             <div id="step1" class="add-point-step">
                 <h3>マップを選択</h3>
@@ -172,7 +187,20 @@
                 <h3>位置を選択</h3>
                 <div class="map-display">
                     <div class="map-container">
-                        <img src="" alt="マップ">
+                        <div class="map-root">
+                            <svg id="addPointMapSvg"
+                                 viewBox="0 0 1000 1000"
+                                 preserveAspectRatio="xMidYMid meet"
+                                 style="width: 100%; height: 100%; display: block;">
+                                <!-- 拡大縮小・パンの適用先 -->
+                                <g id="addPointViewport">
+                                    <!-- 背景マップ -->
+                                    <image id="addPointMapImageSvg" x="0" y="0" width="1000" height="1000" href="" />
+                                    <!-- 位置マーカー -->
+                                    <g id="addPointInteractionsLayer"></g>
+                                </g>
+                            </svg>
+                        </div>
                         <div id="positionMarker" class="position-marker" style="display: none;"></div>
                     </div>
                 </div>

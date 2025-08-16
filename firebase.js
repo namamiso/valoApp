@@ -52,6 +52,8 @@ function getAgentSkills(agent) {
 }
 
 // 定点の取得
+// Point: { position: {x:number(0..1), y:number(0..1)} ... }
+// fetchPoints(map, agent, side) は positions を 0..1 で返す前提
 async function fetchPoints(map, agent, side) {
     try {
         const pointsRef = collection(db, "positions");
@@ -80,6 +82,7 @@ async function fetchPoints(map, agent, side) {
 }
 
 // 定点の追加
+// point: { position: {x:number(0..1), y:number(0..1)}, ... }
 async function addPoint(point) {
     try {
         const docRef = await addDoc(collection(db, "positions"), point);

@@ -26,7 +26,10 @@ let selectedDescription = '';
 const mapButtons = document.querySelector('.map-buttons');
 const sideButtons = document.querySelectorAll('.side-btn');
 const agentButtons = document.querySelector('.agent-buttons');
-const mapImage = document.getElementById('mapImage');
+const mapSvg = document.getElementById('mapSvg');
+const viewport = document.getElementById('viewport');
+const mapImageSvg = document.getElementById('mapImageSvg');
+const pointsLayer = document.getElementById('pointsLayer');
 const mapDisplay = document.querySelector('.map-display');
 const mapContainer = document.querySelector('.map-container');
 const pointModal = document.getElementById('pointModal');
@@ -52,22 +55,34 @@ const positionMarker = document.getElementById('positionMarker');
 const positionX = document.getElementById('positionX');
 const positionY = document.getElementById('positionY');
 
-// マップのズームとパン用の変数
-let scale = 1;
-let isDragging = false;
-let startX;
-let startY;
-let translateX = 0;
-let translateY = 0;
+
 
 // パスの解決用関数
 function resolvePath(relativePath) {
-    // 開発環境では相対パスを使用
-    if (window.location.protocol === 'file:') {
-        return relativePath;
+    // 相対パスをそのまま使用
+    return relativePath;
+}
+
+// 正規化→論理座標（0..1 → 0..1000）
+const L = 1000;
+const toLogical = ({x, y}) => ({ X: x * L, Y: y * L });
+
+// クライアント座標→SVG座標（論理座標）→正規化（0..1）
+function svgPointFromClient(evt) {
+    const pt = mapSvg.createSVGPoint();
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+    const inv = mapSvg.getScreenCTM().inverse();
+    const svgP = pt.matrixTransform(inv); // これは viewBox 座標（0..1000）
+    return { x: svgP.x / L, y: svgP.y / L }; // 正規化0..1
+}
+
+// モーダル外クリックで閉じる関数
+function closeModalOnOutsideClick(event) {
+    if (event.target === pointModal) {
+        pointModal.style.display = 'none';
+        pointModal.removeEventListener('click', closeModalOnOutsideClick);
     }
-    // 本番環境では絶対パスを使用
-    return window.location.origin + '/' + relativePath;
 }
 
 // 初期化
@@ -252,9 +267,13 @@ function setupEventListeners() {
             if (modal) {
                 modal.style.display = 'none';
                 if (modal.id === 'addPointModal') {
-            isAddingPoint = false;
-            positionMarker.style.display = 'none';
-        }
+                    isAddingPoint = false;
+                    positionMarker.style.display = 'none';
+                }
+                // 定点モーダルの場合、イベントリスナーをクリーンアップ
+                if (modal.id === 'pointModal') {
+                    modal.removeEventListener('click', closeModalOnOutsideClick);
+                }
             }
         });
     });
@@ -321,6 +340,24 @@ function setupEventListeners() {
         button.addEventListener('click', goToPrevStep);
     });
 
+    // ESCキーでモーダルを閉じる
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            if (pointModal.style.display === 'block') {
+                pointModal.style.display = 'none';
+                pointModal.removeEventListener('click', closeModalOnOutsideClick);
+            }
+            if (favoritesModal.style.display === 'block') {
+                favoritesModal.style.display = 'none';
+            }
+            if (addPointModal.style.display === 'block') {
+                addPointModal.style.display = 'none';
+                isAddingPoint = false;
+                positionMarker.style.display = 'none';
+            }
+        }
+    });
+
     // マップ選択（ステップ1）
     document.querySelectorAll('#step1 .map-btn').forEach(button => {
         button.addEventListener('click', () => {
@@ -333,46 +370,27 @@ function setupEventListeners() {
         });
     });
 
-    // マップのドラッグ機能
-    mapDisplay.addEventListener('mousedown', (e) => {
-        if (e.button === 0) { // 左クリックの場合のみ
-            isDragging = true;
-            startX = e.clientX - translateX;
-            startY = e.clientY - translateY;
-            mapDisplay.style.cursor = 'grabbing';
-        }
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        if (isDragging) {
-            e.preventDefault();
-            translateX = e.clientX - startX;
-            translateY = e.clientY - startY;
-            mapContainer.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
-        }
-    });
-
-    document.addEventListener('mouseup', () => {
-        if (isDragging) {
-            isDragging = false;
-            mapDisplay.style.cursor = 'grab';
-        }
-    });
-
-    // マップのズーム機能
-    mapDisplay.addEventListener('wheel', (e) => {
+    // ズーム・パン（viewportへ集約）
+    let scale = 1, tx = 0, ty = 0;
+    mapSvg.addEventListener('wheel', (e) => {
         e.preventDefault();
-        const delta = e.deltaY;
-        const zoomFactor = 0.1;
+        const delta = Math.sign(e.deltaY) * 0.1;
+        scale = Math.max(0.5, Math.min(4, scale - delta));
+        viewport.setAttribute('transform', `translate(${tx}, ${ty}) scale(${scale})`);
+    }, { passive: false });
 
-        if (delta < 0) {
-            scale = Math.min(scale + zoomFactor, 3);
-        } else {
-            scale = Math.max(scale - zoomFactor, 0.5);
-        }
-
-        mapContainer.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
+    let dragging = false, startX = 0, startY = 0;
+    mapSvg.addEventListener('mousedown', (e) => {
+        dragging = true; startX = e.clientX; startY = e.clientY;
     });
+    window.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        tx += (e.clientX - startX) / scale;
+        ty += (e.clientY - startY) / scale;
+        startX = e.clientX; startY = e.clientY;
+        viewport.setAttribute('transform', `translate(${tx}, ${ty}) scale(${scale})`);
+    });
+    window.addEventListener('mouseup', () => dragging = false);
 
     // エージェント選択エリアのスクロール
     const agentSelection = document.querySelector('.agent-selection');
@@ -385,8 +403,9 @@ function setupEventListeners() {
 // マップ表示の更新
 function updateMapDisplay() {
     const prefix = currentSide === 'attack' ? 'atk_' : 'def_';
-    const mapPath = resolvePath(`assets/maps/${prefix}${currentMap.toLowerCase()}.svg`);
-    mapImage.src = mapPath;
+    const file = `${prefix}${currentMap.toLowerCase()}.svg`;
+    // assets/maps に配置済みのSVGを使う
+    mapImageSvg.setAttribute('href', resolvePath(`assets/maps/${file}`));
 }
 
 // 定点の読み込み
@@ -403,55 +422,35 @@ async function loadPoints() {
 
 // 定点の表示
 function displayPoints(points) {
-    // 既存の定点をクリア
-    const existingPoints = document.querySelectorAll('.point-marker');
-    existingPoints.forEach(point => point.remove());
-
-    points.forEach(point => {
-        const marker = document.createElement('div');
-        marker.className = 'point-marker';
-        marker.style.left = `${point.position.x}%`;
-        marker.style.top = `${point.position.y}%`;
-        marker.dataset.pointId = point.id;
-
-        // スキルアイコンの作成
-        const skillIcon = document.createElement('img');
-        const formattedSkill = point.skill
-            .split(/\s+|\//)
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-            .join('_')
-            .replace(/\//g, '');
-        skillIcon.src = resolvePath(`assets/skills/${formattedSkill}.webp`);
-        skillIcon.alt = point.skill;
-        skillIcon.className = 'point-skill-icon';
-        skillIcon.onerror = function() {
-            console.warn(`Failed to load skill icon: ${skillIcon.src}`);
-            this.style.display = 'none';
-        };
-
-        // カテゴリに基づいて背景色を設定
-        const category = point.category[0];
+    pointsLayer.innerHTML = '';
+    points.forEach(p => {
+        const { X, Y } = toLogical(p.position); // {x,y} は 0..1 前提
+        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot.setAttribute('cx', String(X));
+        dot.setAttribute('cy', String(Y));
+        dot.setAttribute('r', '8');
+        dot.classList.add('point-dot');
+        dot.dataset.pointId = p.id;
+        
+        // カテゴリに基づいて色を設定
+        const category = p.category[0];
         if (category.includes('情報収集')) {
-            marker.style.backgroundColor = '#4CAF50'; // 緑
+            dot.setAttribute('fill', '#4CAF50'); // 緑
         } else if (category.includes('敵の位置特定')) {
-            marker.style.backgroundColor = '#2196F3'; // 青
+            dot.setAttribute('fill', '#2196F3'); // 青
         } else if (category.includes('エントリー')) {
-            marker.style.backgroundColor = '#FFC107'; // 黄
+            dot.setAttribute('fill', '#FFC107'); // 黄
         } else if (category.includes('サイト攻略')) {
-            marker.style.backgroundColor = '#FF5722'; // オレンジ
+            dot.setAttribute('fill', '#FF5722'); // オレンジ
         } else if (category.includes('サイト防衛')) {
-            marker.style.backgroundColor = '#9C27B0'; // 紫
+            dot.setAttribute('fill', '#9C27B0'); // 紫
         } else if (category.includes('敵の排除')) {
-            marker.style.backgroundColor = '#F44336'; // 赤
+            dot.setAttribute('fill', '#F44336'); // 赤
         }
 
-        marker.appendChild(skillIcon);
-        mapContainer.appendChild(marker);
-
-        // クリックイベントの設定
-        marker.addEventListener('click', () => {
-            showPointDetails(point);
-        });
+        // クリックで詳細表示など
+        dot.addEventListener('click', () => showPointDetails(p));
+        pointsLayer.appendChild(dot);
     });
 }
 
@@ -474,6 +473,11 @@ function showPointDetails(point) {
     favoriteBtn.classList.toggle('active', isFavorite);
 
     pointModal.style.display = 'block';
+    
+    // モーダル外クリックで閉じる機能を追加
+    setTimeout(() => {
+        pointModal.addEventListener('click', closeModalOnOutsideClick);
+    }, 100);
 }
 
 // スライダーの更新
@@ -728,104 +732,68 @@ function updateSkillSelection() {
 // マップ表示の更新（定点追加用）
 function updateAddPointMapDisplay() {
     const prefix = selectedSide === 'attack' ? 'atk_' : 'def_';
-    const mapPath = resolvePath(`assets/maps/${prefix}${selectedMap.toLowerCase()}.svg`);
-    const mapImage = document.querySelector('#step6 .map-display img');
-    if (mapImage) {
-        mapImage.src = mapPath;
+    const file = `${prefix}${selectedMap.toLowerCase()}.svg`;
+    const addPointMapImageSvg = document.getElementById('addPointMapImageSvg');
+    if (addPointMapImageSvg) {
+        addPointMapImageSvg.setAttribute('href', resolvePath(`assets/maps/${file}`));
     }
 
-    // マップ表示エリアの要素を取得
-    const mapDisplay = document.querySelector('#step6 .map-display');
-    const mapContainer = document.querySelector('#step6 .map-container');
-
-    // ズームとドラッグ用の変数
-    let scale = 1;
-    let isDragging = false;
-    let startX, startY;
-    let translateX = 0;
-    let translateY = 0;
-
-    // マウスダウンイベント
-    mapDisplay.addEventListener('mousedown', (e) => {
-        if (e.button === 0) { // 左クリックの場合のみ
-            isDragging = true;
-            startX = e.clientX - translateX;
-            startY = e.clientY - translateY;
-            mapDisplay.style.cursor = 'grabbing';
-        }
-    });
-
-    // マウス移動イベント
-    document.addEventListener('mousemove', (e) => {
-        if (isDragging) {
+    // 定点追加用のズーム・パン設定
+    const addPointMapSvg = document.getElementById('addPointMapSvg');
+    const addPointViewport = document.getElementById('addPointViewport');
+    
+    if (addPointMapSvg && addPointViewport) {
+        let addPointScale = 1, addPointTx = 0, addPointTy = 0;
+        
+        // ホイールイベント（ズーム）
+        addPointMapSvg.addEventListener('wheel', (e) => {
             e.preventDefault();
-            translateX = e.clientX - startX;
-            translateY = e.clientY - startY;
-            mapContainer.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
-        }
-    });
+            const delta = Math.sign(e.deltaY) * 0.1;
+            addPointScale = Math.max(0.5, Math.min(4, addPointScale - delta));
+            addPointViewport.setAttribute('transform', `translate(${addPointTx}, ${addPointTy}) scale(${addPointScale})`);
+        }, { passive: false });
 
-    // マウスアップイベント
-    document.addEventListener('mouseup', () => {
-        if (isDragging) {
-            isDragging = false;
-            mapDisplay.style.cursor = 'grab';
-        }
-    });
-
-    // ホイールイベント（ズーム）
-    mapDisplay.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        const delta = e.deltaY;
-        const zoomFactor = 0.1;
-
-        if (delta < 0) {
-            scale = Math.min(scale + zoomFactor, 3);
-        } else {
-            scale = Math.max(scale - zoomFactor, 0.5);
-        }
-
-        mapContainer.style.transform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
-    });
-
-    // マップクリック時の処理を修正
-    mapDisplay.addEventListener('click', (e) => {
-        if (!isDragging) { // ドラッグ中でない場合のみ位置を設定
-            const rect = mapDisplay.getBoundingClientRect();
-            const x = ((e.clientX - rect.left - translateX) / (rect.width * scale)) * 100;
-            const y = ((e.clientY - rect.top - translateY) / (rect.height * scale)) * 100;
-
-            const positionMarker = document.getElementById('positionMarker');
-            positionMarker.style.left = `${x}%`;
-            positionMarker.style.top = `${y}%`;
-            positionMarker.style.display = 'block';
-
-            document.getElementById('positionX').textContent = x.toFixed(1);
-            document.getElementById('positionY').textContent = y.toFixed(1);
-
-            selectedPosition = { x, y };
-            document.querySelector('#step6 .next-step-btn').disabled = false;
-        }
-    });
+        // ドラッグ機能
+        let addPointDragging = false, addPointStartX = 0, addPointStartY = 0;
+        addPointMapSvg.addEventListener('mousedown', (e) => {
+            addPointDragging = true; addPointStartX = e.clientX; addPointStartY = e.clientY;
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!addPointDragging) return;
+            addPointTx += (e.clientX - addPointStartX) / addPointScale;
+            addPointTy += (e.clientY - addPointStartY) / addPointScale;
+            addPointStartX = e.clientX; addPointStartY = e.clientY;
+            addPointViewport.setAttribute('transform', `translate(${addPointTx}, ${addPointTy}) scale(${addPointScale})`);
+        });
+        window.addEventListener('mouseup', () => addPointDragging = false);
+    }
 }
 
-// マップクリック時の処理
+// マップクリック時の処理（SVG用）
 function handleMapClick(e) {
-    const mapDisplay = document.querySelector('#step6 .map-display');
-    const rect = mapDisplay.getBoundingClientRect();
+    const addPointMapSvg = document.getElementById('addPointMapSvg');
+    if (!addPointMapSvg) return;
 
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    const pt = addPointMapSvg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const inv = addPointMapSvg.getScreenCTM().inverse();
+    const svgP = pt.matrixTransform(inv); // これは viewBox 座標（0..1000）
+    const norm = { x: svgP.x / 1000, y: svgP.y / 1000 }; // 正規化0..1
+
+    // パーセンテージ表示（0-100）
+    const xPercent = norm.x * 100;
+    const yPercent = norm.y * 100;
 
     const positionMarker = document.getElementById('positionMarker');
-    positionMarker.style.left = `${x}%`;
-    positionMarker.style.top = `${y}%`;
+    positionMarker.style.left = `${xPercent}%`;
+    positionMarker.style.top = `${yPercent}%`;
     positionMarker.style.display = 'block';
 
-    document.getElementById('positionX').textContent = x.toFixed(1);
-    document.getElementById('positionY').textContent = y.toFixed(1);
+    document.getElementById('positionX').textContent = xPercent.toFixed(1);
+    document.getElementById('positionY').textContent = yPercent.toFixed(1);
 
-    selectedPosition = { x, y };
+    selectedPosition = norm; // 0..1 の正規化座標を保存
     document.querySelector('#step6 .next-step-btn').disabled = false;
 }
 
@@ -924,19 +892,19 @@ function updateCategorySelection() {
     });
 }
 
-// マップクリックハンドラーの設定
+// マップクリックハンドラーの設定（SVG用）
 function setupMapClickHandler() {
-    const mapDisplay = document.querySelector('#step6 .map-display');
-    if (mapDisplay) {
-        mapDisplay.addEventListener('click', handleMapClick);
+    const addPointMapSvg = document.getElementById('addPointMapSvg');
+    if (addPointMapSvg) {
+        addPointMapSvg.addEventListener('click', handleMapClick);
     }
 }
 
-// マップクリックハンドラーのクリーンアップ
+// マップクリックハンドラーのクリーンアップ（SVG用）
 function cleanupMapClickHandler() {
-    const mapDisplay = document.querySelector('#step6 .map-display');
-    if (mapDisplay) {
-        mapDisplay.removeEventListener('click', handleMapClick);
+    const addPointMapSvg = document.getElementById('addPointMapSvg');
+    if (addPointMapSvg) {
+        addPointMapSvg.removeEventListener('click', handleMapClick);
     }
 }
 
