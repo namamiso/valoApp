@@ -77,6 +77,12 @@ function svgPointFromClient(evt) {
     return { x: svgP.x / L, y: svgP.y / L }; // 正規化0..1
 }
 
+// スキル名 → アイコンファイルパスを返す関数
+function getSkillIconPath(skill) {
+    const file = skill.trim().replace(/\s+/g, '_') + '.png';
+    return resolvePath(`assets/skills/${file}`);
+}
+
 // モーダル外クリックで閉じる関数
 function closeModalOnOutsideClick(event) {
     if (event.target === pointModal) {
@@ -424,33 +430,28 @@ async function loadPoints() {
 function displayPoints(points) {
     pointsLayer.innerHTML = '';
     points.forEach(p => {
-        const { X, Y } = toLogical(p.position); // {x,y} は 0..1 前提
-        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        dot.setAttribute('cx', String(X));
-        dot.setAttribute('cy', String(Y));
-        dot.setAttribute('r', '8');
-        dot.classList.add('point-dot');
-        dot.dataset.pointId = p.id;
-        
-        // カテゴリに基づいて色を設定
-        const category = p.category[0];
-        if (category.includes('情報収集')) {
-            dot.setAttribute('fill', '#4CAF50'); // 緑
-        } else if (category.includes('敵の位置特定')) {
-            dot.setAttribute('fill', '#2196F3'); // 青
-        } else if (category.includes('エントリー')) {
-            dot.setAttribute('fill', '#FFC107'); // 黄
-        } else if (category.includes('サイト攻略')) {
-            dot.setAttribute('fill', '#FF5722'); // オレンジ
-        } else if (category.includes('サイト防衛')) {
-            dot.setAttribute('fill', '#9C27B0'); // 紫
-        } else if (category.includes('敵の排除')) {
-            dot.setAttribute('fill', '#F44336'); // 赤
-        }
+        const { X, Y } = toLogical(p.position);
 
-        // クリックで詳細表示など
-        dot.addEventListener('click', () => showPointDetails(p));
-        pointsLayer.appendChild(dot);
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('class', 'point');
+        g.setAttribute('transform', `translate(${X}, ${Y})`);
+
+        const hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        hit.setAttribute('r', '14');
+        hit.setAttribute('class', 'point-hit');
+        g.appendChild(hit);
+
+        const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+        img.setAttribute('href', getSkillIconPath(p.skill));
+        img.setAttribute('x', -12);
+        img.setAttribute('y', -12);
+        img.setAttribute('width', '24');
+        img.setAttribute('height', '24');
+        img.setAttribute('class', 'point-icon');
+        g.appendChild(img);
+
+        g.addEventListener('click', () => showPointDetails(p));
+        pointsLayer.appendChild(g);
     });
 }
 

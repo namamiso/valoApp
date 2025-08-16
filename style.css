@@ -426,21 +426,26 @@ body {
     transition: transform 0.2s ease;
 }
 
-/* SVG定点のスタイル */
-.point-dot {
-    fill: #ff4d4f;
-    stroke: #202020;
-    stroke-width: 2px;
-    pointer-events: auto;
-    cursor: pointer;
-    transition: all 0.2s ease;
+/* 判定は常に一定・透明 */
+.point-hit {
+    fill: transparent;
+    stroke: transparent;
+    pointer-events: all;
+    vector-effect: non-scaling-stroke;
 }
 
-.point-dot:hover {
-    fill: #ff6b77;
-    stroke: #404040;
-    stroke-width: 3px;
-    transform: scale(1.1);
+/* アイコンは見た目専用（判定に関与させない） */
+.point-icon {
+    pointer-events: none;
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 120ms ease, filter 120ms ease;
+}
+
+/* hover 演出（サイズと影のみ、判定は変化しない） */
+.point:hover .point-icon {
+    transform: scale(1.06);
+    filter: drop-shadow(0 0 4px rgba(255,70,85,.55));
 }
 
 .point-marker:hover {
