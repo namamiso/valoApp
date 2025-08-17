@@ -79,7 +79,7 @@ function svgPointFromClient(evt) {
 
 // スキル名 → アイコンファイルパスを返す関数
 function getSkillIconPath(skill) {
-    const file = skill.trim().replace(/\s+/g, '_') + '.png';
+    const file = skill.trim().replace(/\s+/g, '_') + '.webp';
     return resolvePath(`assets/skills/${file}`);
 }
 
